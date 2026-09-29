@@ -18,13 +18,17 @@ function themeInit() {
   }
 }
 
+// Project Pages serves under /NBKForrum, local dev serves under /.
+const _base = import.meta.env.BASE_URL || '/';
+const BASENAME = _base === '/' ? undefined : _base.replace(/\/$/, '');
+
 export default function App() {
   const [theme, setTheme] = useState(themeInit);
   useEffect(() => {
     document.documentElement.dataset.theme = theme;
   }, [theme]);
   return (
-    <BrowserRouter>
+    <BrowserRouter basename={BASENAME}>
       <AuthProvider>
         <Navbar theme={theme} onTheme={() => setTheme(theme === 'dark' ? 'light' : 'dark')} />
         <main>
