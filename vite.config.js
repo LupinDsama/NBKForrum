@@ -3,8 +3,8 @@ import react from '@vitejs/plugin-react';
 
 export default defineConfig({
   plugins: [react()],
-  // Project Pages URL: https://lupindsama.github.io/NBKForrum/
-  base: '/NBKForrum/',
+  // GitHub Project Pages: /NBKForrum/ | Cloudflare Pages root domain: /
+  base: process.env.SITE_BASE || '/NBKForrum/',
   server: {
     port: 5173,
     proxy: {
