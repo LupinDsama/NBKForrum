@@ -1,4 +1,6 @@
-# NBK Forum — backend Worker (theo share link "Thiết kế forum serverless")
+# NBK Forum — backend Worker ("Thiết kế forum serverless")
+
+https://nbk-forum.pages.dev
 
 Stack đúng guide: React+Vite + Cloudflare Workers + D1 + R2 (optional), session HttpOnly cookie,
 admin `nhantk123vip@gmail.com`, confession `pending → approved/rejected`.
