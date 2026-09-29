@@ -1,3 +1,8 @@
+// VITE_API_URL: base URL of the deployed Worker, e.g. https://forum-api.user.workers.dev
+// Empty = same origin (local dev via Vite proxy, or single-origin Worker deploy).
+const API_BASE = (import.meta.env.VITE_API_URL || '').replace(/\/$/, '');
+export const apiUrl = (path) => `${API_BASE}${path}`;
+
 async function parse(res) {
   const data = await res.json().catch(() => ({}));
   if (!res.ok) throw new Error(data.error || `Request failed (${res.status})`);
@@ -14,8 +19,8 @@ function opts(method, body) {
 }
 
 export const api = {
-  get: (path) => fetch(path, { credentials: 'include' }).then(parse),
-  post: (path, body) => fetch(path, opts('POST', body)).then(parse),
+  get: (path) => fetch(apiUrl(path), { credentials: 'include' }).then(parse),
+  post: (path, body) => fetch(apiUrl(path), opts('POST', body)).then(parse),
 };
 
 export function timeAgo(ts) {

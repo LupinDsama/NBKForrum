@@ -1,4 +1,5 @@
 import { createContext, useContext, useEffect, useState } from 'react';
+import { apiUrl } from '../api/client.js';
 
 const Ctx = createContext(null);
 export const useAuth = () => useContext(Ctx);
@@ -9,7 +10,7 @@ export function AuthProvider({ children }) {
 
   async function refresh() {
     try {
-      const r = await fetch('/api/auth/me', { credentials: 'include' });
+      const r = await fetch(apiUrl('/api/auth/me'), { credentials: 'include' });
       setUser(r.ok ? await r.json() : null);
     } catch {
       setUser(null);
@@ -21,7 +22,7 @@ export function AuthProvider({ children }) {
   useEffect(() => { refresh(); }, []);
 
   async function login(email, password) {
-    const r = await fetch('/api/auth/login', {
+    const r = await fetch(apiUrl('/api/auth/login'), {
       method: 'POST', credentials: 'include',
       headers: { 'content-type': 'application/json' },
       body: JSON.stringify({ email, password }),
@@ -32,7 +33,7 @@ export function AuthProvider({ children }) {
   }
 
   async function register(email, password, displayName) {
-    const r = await fetch('/api/auth/register', {
+    const r = await fetch(apiUrl('/api/auth/register'), {
       method: 'POST', credentials: 'include',
       headers: { 'content-type': 'application/json' },
       body: JSON.stringify({ email, password, displayName }),
@@ -43,7 +44,7 @@ export function AuthProvider({ children }) {
   }
 
   async function logout() {
-    await fetch('/api/auth/logout', { method: 'POST', credentials: 'include' });
+    await fetch(apiUrl('/api/auth/logout'), { method: 'POST', credentials: 'include' });
     setUser(null);
   }
 
