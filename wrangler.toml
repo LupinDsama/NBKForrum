@@ -10,8 +10,9 @@ database_id = "8be936f2-b35a-412f-9587-9e5af6b2d4cc"
 migrations_dir = "migrations"
 
 # Single-origin deploy (guide PHAN 36): Worker serves frontend dist + /api
-[site]
-bucket = "dist"
+[assets]
+directory = "./dist"
+binding = "ASSETS"
 
 [vars]
 # Must match the admin account from the guide

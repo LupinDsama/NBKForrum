@@ -5,7 +5,6 @@ import { handlePosts } from './routes/posts.js';
 import { handleForum } from './routes/forum.js';
 import { handleConfessions } from './routes/confessions.js';
 import { handleAdmin } from './routes/admin.js';
-import { getAssetFromKV, serveSinglePageApp } from '@cloudflare/kv-asset-handler';
 
 function cors(req: Request, env: Env): HeadersInit {
   // Same-origin deploy (PHAN 36): frontend + /api on one Worker -> no CORS needed.
@@ -71,14 +70,9 @@ export default {
 
     if (url.pathname.startsWith('/api/')) return json({ error: 'Not found' }, 404);
 
-    // Frontend static assets (Workers Sites) + SPA fallback to index.html
-    try {
-      return await getAssetFromKV(
-        { request, waitUntil: ctx.waitUntil.bind(ctx) },
-        { mapRequestToAsset: serveSinglePageApp },
-      );
-    } catch {
-      return json({ error: 'Not found' }, 404);
-    }
+    // Frontend static assets + SPA fallback to index.html
+    const asset = await env.ASSETS.fetch(request);
+    if (asset.status !== 404) return asset;
+    return env.ASSETS.fetch(new Request(new URL('/index.html', request.url), request));
   },
 };
