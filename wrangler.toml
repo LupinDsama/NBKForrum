@@ -1,0 +1,16 @@
+name = "forum-api"
+main = "worker/src/index.ts"
+compatibility_date = "2024-10-01"
+
+# D1 binding (PHAN 4) — replace YOUR_DATABASE_ID after `npx wrangler d1 create forum-db`
+[[d1_databases]]
+binding = "DB"
+database_name = "forum-db"
+database_id = "YOUR_DATABASE_ID"
+migrations_dir = "migrations"
+
+[vars]
+# Must match the admin account from the guide
+ADMIN_EMAIL = "nhantk123vip@gmail.com"
+# If frontend is on another domain, set e.g. https://forum.example.com
+# APP_ORIGIN = "https://forum.example.com"
