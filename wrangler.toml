@@ -6,8 +6,12 @@ compatibility_date = "2024-10-01"
 [[d1_databases]]
 binding = "DB"
 database_name = "forum-db"
-database_id = "YOUR_DATABASE_ID"
+database_id = "8be936f2-b35a-412f-9587-9e5af6b2d4cc"
 migrations_dir = "migrations"
+
+# Single-origin deploy (guide PHAN 36): Worker serves frontend dist + /api
+[site]
+bucket = "dist"
 
 [vars]
 # Must match the admin account from the guide
