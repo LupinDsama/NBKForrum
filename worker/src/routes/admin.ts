@@ -52,6 +52,15 @@ export async function handleAdmin(req: Request, env: Env, url: URL): Promise<Res
       .run();
     if (r.meta.changes === 0) return err('Not found or not pending', 404);
     await logAdmin(env.DB, admin.id, 'approve_confession', 'confession', id);
+    const cfA = await env.DB.prepare(`SELECT author_id FROM confessions WHERE id = ?`).bind(id).first<any>();
+    if (cfA?.author_id) {
+      await env.DB.prepare(
+        `INSERT INTO notifications (user_id, type, title, message, target_type, target_id, is_read, created_at)
+         VALUES (?, 'confession_approved', 'Confession da duoc duyet', 'Bai confession cua ban da duoc phe duyet va hien cong khai.', 'confession', ?, 0, ?)`,
+      )
+        .bind(cfA.author_id, id, now)
+        .run();
+    }
     return json({ ok: true });
   }
 
@@ -70,6 +79,15 @@ export async function handleAdmin(req: Request, env: Env, url: URL): Promise<Res
       .run();
     if (r.meta.changes === 0) return err('Not found or not pending', 404);
     await logAdmin(env.DB, admin.id, 'reject_confession', 'confession', id, { reason });
+    const cfR = await env.DB.prepare(`SELECT author_id FROM confessions WHERE id = ?`).bind(id).first<any>();
+    if (cfR?.author_id) {
+      await env.DB.prepare(
+        `INSERT INTO notifications (user_id, type, title, message, target_type, target_id, is_read, created_at)
+         VALUES (?, 'confession_rejected', 'Confession bi tu choi', ?, 'confession', ?, 0, ?)`,
+      )
+        .bind(cfR.author_id, `Bai confession cua ban bi tu choi. Ly do: ${reason}`, id, now)
+        .run();
+    }
     return json({ ok: true });
   }
 
