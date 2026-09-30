@@ -7,16 +7,17 @@ import { Avatar } from './ui.jsx';
 import Reactions from './Reactions.jsx';
 import MentionTextarea from './MentionTextarea.jsx';
 
-// Render @mentions as highlighted tokens. Content stays plain text.
+// Render @mentions as highlighted tokens. Multi-word names are stored
+// quoted (@"Hoai nam") so the whole name highlights. Content stays plain text.
 export function MentionText({ text }) {
-  const parts = String(text || '').split(/(@[^\s@]{1,50})/g);
+  const parts = String(text || '').split(/(@"[^"\n]{1,60}"|@[^\s@]{1,50})/g);
   return (
     <>
-      {parts.map((p, i) =>
-        p.startsWith('@') && p.length > 1
-          ? <span key={i} className="mention">{p}</span>
-          : <span key={i}>{p}</span>,
-      )}
+      {parts.map((p, i) => {
+        if (p.length < 2 || !p.startsWith('@')) return <span key={i}>{p}</span>;
+        const label = p.startsWith('@"') ? `@${p.slice(2, -1)}` : p;
+        return <span key={i} className="mention">{label}</span>;
+      })}
     </>
   );
 }

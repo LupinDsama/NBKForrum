@@ -14,9 +14,11 @@ export default function MentionTextarea({ value, onChange, id, ...rest }) {
     onChange(e);
     const ta = e.target;
     const pos = ta.selectionStart ?? e.target.value.length;
-    const m = e.target.value.slice(0, pos).match(/@([\p{L}\p{N}_.-]{0,30})$/u);
+    // Allow spaces so multi-word names (Hoai nam) keep filtering while typing.
+    const m = e.target.value.slice(0, pos).match(/@("?)([\p{L}\p{N}_.\- ]{0,40})$/u);
     if (m) {
-      setQ(m[1]);
+      const query = m[1] ? m[2] : m[2].replace(/ +$/, '');
+      setQ(query);
       setAt({ start: pos - m[0].length, end: pos });
       setHi(0);
       setOpen(true);
@@ -41,13 +43,15 @@ export default function MentionTextarea({ value, onChange, id, ...rest }) {
 
   function pick(name) {
     if (!at) return;
-    const next = `${value.slice(0, at.start)}@${name} ${value.slice(at.end)}`;
+    // Quote multi-word names so the full name highlights when rendered.
+    const token = name.includes(' ') ? `@"${name}"` : `@${name}`;
+    const next = `${value.slice(0, at.start)}${token} ${value.slice(at.end)}`;
     onChange({ target: { value: next } });
     setOpen(false);
     requestAnimationFrame(() => {
       const el = id ? document.getElementById(id) : null;
       if (el) {
-        const pos = at.start + name.length + 2;
+        const pos = at.start + token.length + 1;
         el.focus();
         el.setSelectionRange(pos, pos);
       }
