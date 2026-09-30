@@ -140,7 +140,31 @@ export async function handleForum(req: Request, env: Env, url: URL): Promise<Res
     return json({ id: Number(r.meta.last_row_id) }, 201);
   }
 
-  // POST /api/reports {target_type, target_id, reason, description?}
+  // DELETE /api/comments/:id (owner or admin; deletes whole reply subtree + its reactions)
+  const del = path.match(/^\/api\/comments\/(\d+)$/);
+  if (del && req.method === 'DELETE') {
+    const user = await getSessionUser(req, env);
+    if (!user) return err('Unauthorized', 401);
+    const id = Number(del[1]);
+    const row = await env.DB.prepare(`SELECT author_id FROM comments WHERE id = ?`).bind(id).first<any>();
+    if (!row) return err('Not found', 404);
+    if (row.author_id !== user.id && user.role !== 'admin') return err('Forbidden', 403);
+    await env.DB.prepare(
+      `WITH RECURSIVE sub(id) AS (
+         SELECT ? UNION ALL SELECT c.id FROM comments c JOIN sub s ON c.parent_id = s.id
+       ) DELETE FROM comments WHERE id IN (SELECT id FROM sub)`,
+    )
+      .bind(id)
+      .run();
+    await env.DB.prepare(
+      `WITH RECURSIVE sub(id) AS (
+         SELECT ? UNION ALL SELECT c.id FROM comments c JOIN sub s ON c.parent_id = s.id
+       ) DELETE FROM reactions WHERE target_type = 'comment' AND target_id IN (SELECT id FROM sub)`,
+    )
+      .bind(id)
+      .run();
+    return json({ ok: true });
+  }
   if (path === '/api/reports' && req.method === 'POST') {
     const user = await getSessionUser(req, env);
     if (!user) return err('Unauthorized', 401);

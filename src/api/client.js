@@ -21,6 +21,7 @@ function opts(method, body) {
 export const api = {
   get: (path) => fetch(apiUrl(path), { credentials: 'include' }).then(parse),
   post: (path, body) => fetch(apiUrl(path), opts('POST', body)).then(parse),
+  delete: (path) => fetch(apiUrl(path), { method: 'DELETE', credentials: 'include' }).then(parse),
 };
 
 export function timeAgo(ts) {

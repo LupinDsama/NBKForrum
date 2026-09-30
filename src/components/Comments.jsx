@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { ChatCircle } from '@phosphor-icons/react';
+import { ChatCircle, ArrowBendUpLeft } from '@phosphor-icons/react';
 import { useAuth } from '../context/AuthContext.jsx';
 import { api, timeAgo } from '../api/client.js';
 import { Avatar } from './ui.jsx';
@@ -30,7 +30,16 @@ function buildTree(flat) {
   return roots;
 }
 
-function CommentNode({ node, targetType, targetId, onReply, depth }) {
+function CommentNode({ node, targetType, targetId, onReply, onChanged, depth }) {
+  const { user } = useAuth();
+  const canDelete = user && (user.id === node.author_id || user.role === 'admin');
+
+  async function recall() {
+    if (!window.confirm('Thu hoi binh luan nay? Cac tra loi ben duoi cung bi xoa.')) return;
+    await api.delete(`/api/comments/${node.id}`);
+    onChanged && onChanged();
+  }
+
   return (
     <div className={depth > 0 ? 'reply-indent' : undefined}>
       <div className="card card-flat">
@@ -40,13 +49,18 @@ function CommentNode({ node, targetType, targetId, onReply, depth }) {
           <button className="btn btn-ghost" style={{ padding: '6px 14px', fontSize: 13 }} onClick={() => onReply(node)}>
             <ChatCircle size={15} weight="regular" />Tra loi
           </button>
+          {canDelete && (
+            <button className="btn btn-ghost" style={{ padding: '6px 14px', fontSize: 13 }} onClick={recall}>
+              <ArrowBendUpLeft size={15} weight="regular" />Thu hoi
+            </button>
+          )}
           <Reactions targetType="comment" targetId={node.id} />
         </div>
       </div>
       {node.replies.length > 0 && (
         <div className="list" style={{ marginTop: 8 }}>
           {node.replies.map((r) => (
-            <CommentNode key={r.id} node={r} targetType={targetType} targetId={targetId} onReply={onReply} depth={depth + 1} />
+            <CommentNode key={r.id} node={r} targetType={targetType} targetId={targetId} onReply={onReply} onChanged={onChanged} depth={depth + 1} />
           ))}
         </div>
       )}
@@ -89,7 +103,7 @@ export default function CommentThread({ targetType, targetId, comments, onChange
       {tree.length === 0 && <p className="muted">Chua co binh luan. Hay la nguoi dau tien chia se goc nhin.</p>}
       <div className="list">
         {tree.map((n) => (
-          <CommentNode key={n.id} node={n} targetType={targetType} targetId={targetId} onReply={startReply} depth={0} />
+          <CommentNode key={n.id} node={n} targetType={targetType} targetId={targetId} onReply={startReply} onChanged={onChanged} depth={0} />
         ))}
       </div>
       {!hideForm && (user ? (

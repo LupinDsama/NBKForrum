@@ -30,7 +30,7 @@ function ConfessionCard({ c, showComments }) {
 
   return (
     <article className="card card-flat">
-      <div className="meta"><Avatar name="A" /><span>An danh</span><span>{timeAgo(c.published_at || c.created_at)}</span></div>
+      <div className="meta"><span className="badge">#{c.id}</span><Avatar name="A" /><span>An danh</span><span>{timeAgo(c.published_at || c.created_at)}</span></div>
       <p>{c.content}</p>
       <div className="row">
         <Reactions targetType="confession" targetId={c.id} />
