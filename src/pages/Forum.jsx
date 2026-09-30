@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+﻿import { useEffect, useMemo, useState } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import { MagnifyingGlass, PencilSimple, Question } from '@phosphor-icons/react';
 import { useAuth } from '../context/AuthContext.jsx';
@@ -64,7 +64,7 @@ export default function Forum() {
   return (
     <div className="wrap page">
       <h1>Forum</h1>
-      <p className="muted" style={{ maxWidth: '62ch' }}>Thảo luận theo chuyên mục, đặt câu hỏi và trả lời cộng đồng. Bài viết hiện ngay, confession phai qua kiểm duyệt.</p>
+      <p className="muted" style={{ maxWidth: '62ch' }}>Thảo luận theo chuyên mục, đặt câu hỏi và trả lời cộng đồng. Bài viết hiện ngay, confession phải qua kiểm duyệt.</p>
 
       <div className="pills" aria-label="Lọc theo chuyên mục">
         <button className="pill" aria-pressed={!activeCat} onClick={() => setParams({})}>Tất cả</button>
@@ -76,7 +76,7 @@ export default function Forum() {
       <div className="row" style={{ marginBottom: 6 }}>
         <span style={{ position: 'relative', flex: '1 1 240px', maxWidth: 380 }}>
           <MagnifyingGlass size={17} weight="regular" style={{ position: 'absolute', left: 12, top: 12 }} />
-          <input aria-label="Tìm bài viết" placeholder="Tìm theo tiêu đề hoac tac gia" value={q} onChange={(e) => setQ(e.target.value)} style={{ paddingLeft: 36 }} />
+          <input aria-label="Tìm bài viết" placeholder="Tìm theo tiêu đề hoặc tác giả" value={q} onChange={(e) => setQ(e.target.value)} style={{ paddingLeft: 36 }} />
         </span>
       </div>
 
@@ -89,21 +89,21 @@ export default function Forum() {
         <>
           {user && (
             <form className="card" onSubmit={submitPost}>
-              <label htmlFor="pt">Tiêu đề bai viet</label>
+              <label htmlFor="pt">Tiêu đề bài viết</label>
               <input id="pt" value={title} onChange={(e) => setTitle(e.target.value)} maxLength={200} placeholder="Ví dụ: Cách ôn thì Vật lý hiệu quả" />
               <label htmlFor="pc">Nội dung</label>
               <textarea id="pc" rows={4} value={content} onChange={(e) => setContent(e.target.value)} placeholder="Mô tả chi tiết van để của bạn" />
               <p className="helper">Tối đa 200 ký tự tiêu đề, nội dung văn minh.</p>
               {err && <p className="field-err">{err}</p>}
               <div className="row" style={{ marginTop: 12 }}>
-                <button className="btn btn-primary" type="submit" disabled={!title.trim() || !content.trim()}>Dang bai</button>
+                <button className="btn btn-primary" type="submit" disabled={!title.trim() || !content.trim()}>Đăng bài</button>
               </div>
             </form>
           )}
           <h2 style={{ marginTop: 26 }}>Bài viết{activeCat ? ` trong ${activeCat}` : ''}</h2>
           {filteredPosts === null && <SkeletonList rows={4} />}
           {filteredPosts !== null && filteredPosts.length === 0 && (
-            <EmptyState title="Chưa có bai viet" hint={user ? 'Hãy tạo bài đầu tiên cho chu để này.' : 'Đăng nhập để đăng bài đầu tiên.'} />
+            <EmptyState title="Chưa có bài viết" hint={user ? 'Hãy tạo bài đầu tiên cho chu để này.' : 'Đăng nhập để đăng bài đầu tiên.'} />
           )}
           {filteredPosts !== null && filteredPosts.length > 0 && (
             <div className="list">

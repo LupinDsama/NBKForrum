@@ -1,4 +1,4 @@
-// VITE_API_URL: base URL of the deployed Worker, e.g. https://forum-api.user.workers.dev
+﻿// VITE_API_URL: base URL of the deployed Worker, e.g. https://forum-api.user.workers.dev
 // Empty = same origin (local dev via Vite proxy, or single-origin Worker deploy).
 const API_BASE = (import.meta.env.VITE_API_URL || '').replace(/\/$/, '');
 export const apiUrl = (path) => `${API_BASE}${path}`;

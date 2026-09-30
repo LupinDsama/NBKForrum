@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
-import { useParams, Link } from 'react-router-dom';
-import { CheckCircle } from '@phosphor-icons/react';
+import { useParams, Link, useNavigate } from 'react-router-dom';
+import { CheckCircle, Trash } from '@phosphor-icons/react';
 import { useAuth } from '../context/AuthContext.jsx';
 import { api, timeAgo } from '../api/client.js';
 import { Avatar, SkeletonList } from '../components/ui.jsx';
@@ -10,21 +10,35 @@ import Reactions from '../components/Reactions.jsx';
 
 export function PostDetail() {
   const { id } = useParams();
+  const { user } = useAuth();
+  const nav = useNavigate();
   const [data, setData] = useState(null);
   const [failed, setFailed] = useState('');
 
   async function load() {
     try { setData(await api.get(`/api/posts/${id}`)); }
-    catch { setFailed('Không tải được bai viet.'); }
+    catch { setFailed('Không tải được bài viết.'); }
   }
   useEffect(() => { load(); }, [id]);
 
   if (failed) return <div className="wrap page"><p className="field-err">{failed}</p><Link to="/forum">Quay lại forum</Link></div>;
   if (!data) return <div className="wrap page"><SkeletonList rows={3} /></div>;
+  const canDeletePost = user && (user.id === data.post?.author_id || user.role === 'admin');
 
   return (
     <div className="wrap page">
-      <Link to="/forum">Quay lại forum</Link>
+      <div className="row" style={{ justifyContent: 'space-between' }}>
+        <Link to="/forum">Quay lại forum</Link>
+        {canDeletePost && (
+          <button className="btn btn-ghost" style={{ padding: '6px 14px', fontSize: 13 }} onClick={async () => {
+            if (!window.confirm('Xóa bài viết này?')) return;
+            await api.delete(`/api/posts/${id}`);
+            nav('/forum');
+          }}>
+            <Trash size={15} weight="regular" />Xóa bài
+          </button>
+        )}
+      </div>
       <h1>{data.post?.title}</h1>
       <div className="meta"><Avatar name={data.post?.author_name} /><span>{data.post?.author_name}</span><span>{timeAgo(data.post?.created_at)}</span><span>{data.post?.views} lượt xem</span></div>
       <div className="card" style={{ marginTop: 16 }}><p style={{ margin: 0, whiteSpace: 'pre-wrap' }}>{data.post?.content}</p></div>
@@ -40,6 +54,7 @@ export function PostDetail() {
 export function QuestionDetail() {
   const { id } = useParams();
   const { user } = useAuth();
+  const nav = useNavigate();
   const [data, setData] = useState(null);
   const [failed, setFailed] = useState('');
   const [answer, setAnswer] = useState('');
@@ -54,10 +69,22 @@ export function QuestionDetail() {
   if (failed) return <div className="wrap page"><p className="field-err">{failed}</p><Link to="/forum">Quay lại forum</Link></div>;
   if (!data) return <div className="wrap page"><SkeletonList rows={3} /></div>;
   const canAccept = user && (user.id === data.question?.author_id || user.role === 'admin');
+  const canDeleteQ = user && (user.id === data.question?.author_id || user.role === 'admin');
 
   return (
     <div className="wrap page">
-      <Link to="/forum">Quay lại forum</Link>
+      <div className="row" style={{ justifyContent: 'space-between' }}>
+        <Link to="/forum">Quay lại forum</Link>
+        {canDeleteQ && (
+          <button className="btn btn-ghost" style={{ padding: '6px 14px', fontSize: 13 }} onClick={async () => {
+            if (!window.confirm('Xóa câu hỏi này? Các câu trả lời cũng bị ẩn theo.')) return;
+            await api.delete(`/api/questions/${id}`);
+            nav('/forum');
+          }}>
+            <Trash size={15} weight="regular" />Xóa bài
+          </button>
+        )}
+      </div>
       <h1>{data.question?.title}</h1>
       <div className="meta"><Avatar name={data.question?.author_name} /><span>{data.question?.author_name}</span><span>{timeAgo(data.question?.created_at)}</span></div>
       <div className="card" style={{ marginTop: 16 }}><p style={{ margin: 0, whiteSpace: 'pre-wrap' }}>{data.question?.content}</p></div>

@@ -76,21 +76,23 @@ export default function Admin() {
   const [approved, setApproved] = useState(null);
   const [reports, setReports] = useState(null);
   const [posts, setPosts] = useState(null);
+  const [questionsAdmin, setQuestionsAdmin] = useState(null);
   const [users, setUsers] = useState(null);
   const [search, setSearch] = useState('');
   const [failed, setFailed] = useState('');
 
   async function load() {
     try {
-      const [s, p, a, r, ps] = await Promise.all([
+      const [s, p, a, r, ps, qs] = await Promise.all([
         api.get('/api/admin/dashboard'),
         api.get('/api/admin/confessions?status=pending'),
         api.get('/api/admin/confessions?status=approved'),
         api.get('/api/admin/reports?status=open'),
         api.get('/api/admin/posts'),
+        api.get('/api/admin/questions'),
       ]);
       setStats(s); setPending(p.items || []); setApproved(a.items || []);
-      setReports(r.items || []); setPosts(ps.items || []);
+      setReports(r.items || []); setPosts(ps.items || []); setQuestionsAdmin(qs.items || []);
     } catch (ex) { setFailed(ex.message); }
   }
   async function loadUsers() {
@@ -104,6 +106,7 @@ export default function Admin() {
     ['confessions', `Duyệt bài (${pending?.length ?? 0})`],
     ['approved', `Đã duyệt (${approved?.length ?? 0})`],
     ['posts', `Bài viết (${posts?.length ?? 0})`],
+    ['questions', `Hỏi đáp (${questionsAdmin?.length ?? 0})`],
     ['reports', `Báo cáo (${reports?.length ?? 0})`],
     ['users', 'Người dùng'],
   ];
@@ -111,10 +114,10 @@ export default function Admin() {
   return (
     <div className="wrap page">
       <h1>Quản trị</h1>
-      <p className="muted">Duyệt confession, xoa bai vi phạm, xử lý báo cáo và quản lý nguoi dung. Mọi tác động được ghi log.</p>
+      <p className="muted">Duyệt confession, xóa bài vi phạm, xử lý báo cáo và quản lý người dùng. Mọi tác động được ghi log.</p>
       {failed && <p className="field-err">{failed}</p>}
 
-      <div className="tabs" role="tablist" aria-label="Khu vuc quan tri">
+      <div className="tabs" role="tablist" aria-label="Khu vực quản trị">
         {tabs.map(([t, label]) => (
           <button key={t} role="tab" className="tab" aria-selected={tab === t} onClick={() => { setTab(t); if (t === 'users') loadUsers(); }}>
             {label}
@@ -128,14 +131,14 @@ export default function Admin() {
             <div className="card"><strong style={{ fontSize: 28 }}>{stats.users}</strong><div className="muted">Người dùng</div></div>
             <div className="card"><strong style={{ fontSize: 28 }}>{stats.posts}</strong><div className="muted">Bài viết</div></div>
             <div className="card"><strong style={{ fontSize: 28 }}>{stats.pendingConfessions}</strong><div className="muted">Chờ duyệt</div></div>
-            <div className="card"><strong style={{ fontSize: 28 }}>{stats.openReports}</strong><div className="muted">Báo cáo mo</div></div>
+            <div className="card"><strong style={{ fontSize: 28 }}>{stats.openReports}</strong><div className="muted">Báo cáo mở</div></div>
           </div>
         ) : <SkeletonList rows={2} />
       )}
 
       {tab === 'confessions' && (
         pending === null ? <SkeletonList rows={3} /> : pending.length === 0 ? (
-          <EmptyState title="Không còn bài cho duyet" hint="Hàng đợi đang trống. Bài mới se hiện ở đây." />
+          <EmptyState title="Không còn bài chờ duyệt" hint="Hàng đợi đang trống. Bài mới sẽ hiện ở đây." />
         ) : (
           <div className="list">
             {pending.map((c) => (
@@ -150,7 +153,7 @@ export default function Admin() {
                     <Check size={16} weight="regular" />Duyệt
                   </button>
                   <button className="btn btn-ghost" onClick={async () => {
-                    const reason = window.prompt('Lý do tu choi:', 'Nội dung không phù hợp');
+                    const reason = window.prompt('Lý do từ chơi:', 'Nội dung không phù hợp');
                     if (reason === null) return;
                     await api.post(`/api/admin/confessions/${c.id}/reject`, { reason });
                     load();
@@ -166,7 +169,7 @@ export default function Admin() {
 
       {tab === 'approved' && (
         approved === null ? <SkeletonList rows={3} /> : approved.length === 0 ? (
-          <EmptyState title="Chưa có bai da duyet" hint="Bài được duyệt se hiện ở đây để tiếp tục kiem soat." />
+          <EmptyState title="Chưa có bài đã duyệt" hint="Bài được duyệt sẽ hiện ở đây để tiếp tục kiểm soát." />
         ) : (
           <div className="list">
             {approved.map((c) => (
@@ -178,7 +181,7 @@ export default function Admin() {
 
       {tab === 'posts' && (
         posts === null ? <SkeletonList rows={3} /> : posts.length === 0 ? (
-          <EmptyState title="Chưa có bai viet" hint="Bài viết của nguoi dung se hiện ở đây." />
+          <EmptyState title="Chưa có bài viết" hint="Bài viết của người dùng sẽ hiện ở đây." />
         ) : (
           <div className="list">
             {posts.map((p) => (
@@ -205,9 +208,38 @@ export default function Admin() {
         )
       )}
 
+      {tab === 'questions' && (
+        questionsAdmin === null ? <SkeletonList rows={3} /> : questionsAdmin.length === 0 ? (
+          <EmptyState title="Chưa có câu hỏi" hint="Câu hỏi của người dùng sẽ hiện ở đây." />
+        ) : (
+          <div className="list">
+            {questionsAdmin.map((item) => (
+              <div key={item.id} className="card card-flat">
+                <div className="row">
+                  <Avatar name={item.author_name} />
+                  <div>
+                    <Link to={`/questions/${item.id}`} className="post-title">{item.title}</Link>
+                    <div className="meta"><span>{item.author_name}</span><span>{timeAgo(item.created_at)}</span><span>{item.status}</span></div>
+                  </div>
+                </div>
+                <div className="row" style={{ marginTop: 10 }}>
+                  <button className="btn btn-ghost" style={{ padding: '6px 14px', fontSize: 13 }} onClick={async () => {
+                    if (!window.confirm(`Xóa câu hỏi "${item.title}"?`)) return;
+                    await api.post(`/api/admin/questions/${item.id}/delete`, {});
+                    load();
+                  }}>
+                    <Trash size={15} weight="regular" />Xóa bài
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+        )
+      )}
+
       {tab === 'reports' && (
         reports === null ? <SkeletonList rows={3} /> : reports.length === 0 ? (
-          <EmptyState title="Không có báo cáo mo" hint="Báo cáo tu cộng đồng se hiện ở đây." />
+          <EmptyState title="Không có báo cáo mở" hint="Báo cáo từ cộng đồng sẽ hiện ở đây." />
         ) : (
           <div className="list">
             {reports.map((r) => (
@@ -229,7 +261,7 @@ export default function Admin() {
           <div className="row">
             <span style={{ position: 'relative', flex: '1 1 240px', maxWidth: 360 }}>
               <MagnifyingGlass size={17} weight="regular" style={{ position: 'absolute', left: 12, top: 12 }} />
-              <input aria-label="Tìm người dùng" placeholder="Tìm theo email hoac ten" value={search} onChange={(e) => setSearch(e.target.value)} style={{ paddingLeft: 36 }} />
+              <input aria-label="Tìm người dùng" placeholder="Tìm theo email hoặc tên" value={search} onChange={(e) => setSearch(e.target.value)} style={{ paddingLeft: 36 }} />
             </span>
             <button className="btn btn-ghost" onClick={loadUsers}>Tìm</button>
           </div>

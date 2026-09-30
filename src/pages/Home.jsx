@@ -35,7 +35,7 @@ export default function Home() {
       <section className="hero">
         <div className="hero-grid">
           <div>
-            <h1>Diễn đàn học tập và chia sẻ that</h1>
+            <h1>Diễn đàn học tập và chia sẻ thật</h1>
             <p>Hỏi đáp Lập trình, Vật lý, Toán và Gaming, cùng confession ẩn danh được kiểm duyệt trước khi hiện.</p>
             <div className="row">
               <Link to="/forum" className="btn btn-primary">Vào forum<ArrowRight size={17} weight="regular" /></Link>
@@ -68,13 +68,13 @@ export default function Home() {
 
       <hr className="divider" />
 
-      <section className="grid-2" aria-label="Moi nhat">
+      <section className="grid-2" aria-label="Mới nhat">
         <div>
           <h2><ChatCircleText size={20} weight="regular" style={{ verticalAlign: -3 }} /> Bài viết mới</h2>
           {posts === null && !failed && <SkeletonList rows={3} />}
           {failed && <p className="field-err">{failed}</p>}
           {posts !== null && posts.length === 0 && (
-            <EmptyState title="Chưa có bai viet" hint="Hãy là người đầu tiên đặt câu hỏi cho cộng đồng." action={<Link to="/forum" className="btn btn-primary">Dang bai</Link>} />
+            <EmptyState title="Chưa có bài viết" hint="Hãy là người đầu tiên đặt câu hỏi cho cộng đồng." action={<Link to="/forum" className="btn btn-primary">Đăng bài</Link>} />
           )}
           {posts !== null && posts.length > 0 && (
             <div className="list">
@@ -93,7 +93,7 @@ export default function Home() {
           )}
         </div>
         <div>
-          <h2><ShieldCheck size={20} weight="regular" style={{ verticalAlign: -3 }} /> Confession da duyet</h2>
+          <h2><ShieldCheck size={20} weight="regular" style={{ verticalAlign: -3 }} /> Confession đã duyệt</h2>
           {confessions === null && !failed && <SkeletonList rows={2} />}
           {confessions !== null && confessions.length === 0 && (
             <EmptyState title="Chưa có confession" hint="Bài gửi sẽ hiện ở đây sau khi admin phê duyệt." />
@@ -111,7 +111,7 @@ export default function Home() {
           )}
           <h2 style={{ marginTop: 28 }}><Question size={20} weight="regular" style={{ verticalAlign: -3 }} /> Cách confession hoạt động</h2>
           <div className="card card-flat">
-            <p className="muted" style={{ margin: 0 }}>Gửi bài o trạng thái cho duyet. Admin xem nội dung that, cộng đồng chi thay chu Ẩn danh.</p>
+            <p className="muted" style={{ margin: 0 }}>Gửi bài ở trạng thái chờ duyệt. Admin xem nội dung thật, cộng đồng chỉ thấy chữ Ẩn danh.</p>
           </div>
         </div>
       </section>

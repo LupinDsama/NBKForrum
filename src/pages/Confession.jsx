@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+﻿import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { PaperPlaneTilt, Bell, ChatCircle } from '@phosphor-icons/react';
 import { useAuth } from '../context/AuthContext.jsx';
@@ -100,7 +100,7 @@ export default function Confession() {
     try {
       const r = await api.post('/api/confessions', { content: content.trim() });
       setContent('');
-      setMsg(`Đã gửi bài #${r.id}. Trạng thái hiện tại: cho duyet. Bạn theo dõi ở mục Bài của tôi bên dưới.`);
+      setMsg(`Đã gửi bài #${r.id}. Trạng thái hiện tại: chờ duyệt. Bạn theo dõi ở mục Bài của tôi bên dưới.`);
       loadMine();
     } catch (ex) { setErr(ex.message); } finally { setSending(false); }
   }
@@ -108,7 +108,7 @@ export default function Confession() {
   return (
     <div className="wrap page">
       <h1>Confession</h1>
-      <p className="muted" style={{ maxWidth: '62ch' }}>Chia se ẩn danh. Bài ở trạng thái chờ duyệt và chi hiện công khai sau khi admin chấp nhận.</p>
+      <p className="muted" style={{ maxWidth: '62ch' }}>Chia sẻ ẩn danh. Bài ở trạng thái chờ duyệt và chỉ hiện công khai sau khi admin chấp nhận.</p>
       <div className="grid-2">
         <form className="card" onSubmit={submit}>
           <label htmlFor="cc">Nội dung confession</label>
@@ -116,7 +116,7 @@ export default function Confession() {
           <p className="helper">{content.length}/{MAX} ký tự. Không đăng thông tin cá nhân.</p>
           {err && <p className="field-err">{err}</p>}
           {msg && <p className="notice" style={{ marginTop: 10 }}>{msg}</p>}
-          {!user && <p className="helper">Bạn có thể gui mà khong can đăng nhập, nhung đăng nhập thì mới theo doi được trạng thái bai của mình.</p>}
+          {!user && <p className="helper">Bạn có thể gửi mà không cần đăng nhập, nhưng đăng nhập thì mới theo dõi được trạng thái bài của mình.</p>}
           <div className="row" style={{ marginTop: 12 }}>
             <button className="btn btn-primary" type="submit" disabled={sending || !content.trim()}>
               <PaperPlaneTilt size={17} weight="regular" />{sending ? 'Đang gửi' : 'Gửi confession'}
@@ -139,7 +139,7 @@ export default function Confession() {
             </div>
           )}
           {mine === null && <SkeletonList rows={2} />}
-          {mine !== null && mine.length === 0 && <EmptyState title="Bạn chưa gửi bai nào" hint="Bài bạn gửi khi đăng nhập se hiện ở đây kem trạng thái." />}
+          {mine !== null && mine.length === 0 && <EmptyState title="Bạn chưa gửi bài nào" hint="Bài bạn gửi khi đăng nhập sẽ hiện ở đây kèm trạng thái." />}
           {mine !== null && mine.length > 0 && (
             <div className="list">
               {mine.map((c) => (
@@ -150,9 +150,9 @@ export default function Confession() {
                   </div>
                   <p style={{ marginBottom: c.status === 'rejected' && c.rejection_reason ? 6 : 0 }}>{c.content}</p>
                   {c.status === 'rejected' && c.rejection_reason && (
-                    <p className="notice" style={{ marginTop: 8 }}>Lý do tu choi: {c.rejection_reason}</p>
+                    <p className="notice" style={{ marginTop: 8 }}>Lý do từ chơi: {c.rejection_reason}</p>
                   )}
-                  {c.status === 'pending' && <p className="helper">Đang chờ admin xem. Bạn sẽ thấy thông báo khi co kết quả.</p>}
+                  {c.status === 'pending' && <p className="helper">Đang chờ admin xem. Bạn sẽ thấy thông báo khi có kết quả.</p>}
                 </article>
               ))}
             </div>
@@ -160,9 +160,9 @@ export default function Confession() {
         </>
       )}
 
-      <h2 style={{ marginTop: 30 }}>Moi được duyet</h2>
+      <h2 style={{ marginTop: 30 }}>Mới được duyệt</h2>
       {items === null && <SkeletonList rows={3} />}
-      {items !== null && items.length === 0 && <EmptyState title="Chưa có confession" hint="Bài duyệt sẽ hiện ở đây. Bạn có thể gui bài đầu tiên." action={!user ? <Link to="/login" className="btn btn-ghost">Đăng nhập để theo dõi bài</Link> : null} />}
+      {items !== null && items.length === 0 && <EmptyState title="Chưa có confession" hint="Bài duyệt sẽ hiện ở đây. Bạn có thể gửi bài đầu tiên." action={!user ? <Link to="/login" className="btn btn-ghost">Đăng nhập để theo dõi bài</Link> : null} />}
       {items !== null && items.length > 0 && (
         <div className="list">
           {items.map((c) => (

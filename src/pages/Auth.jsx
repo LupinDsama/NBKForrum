@@ -1,4 +1,4 @@
-import { useState } from 'react';
+﻿import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { EnvelopeSimple, Key, User } from '@phosphor-icons/react';
 import { useAuth } from '../context/AuthContext.jsx';
@@ -28,7 +28,7 @@ export function Login() {
         catch (ex) { setErr(ex.message); } finally { setBusy(false); }
       }}>
         <label htmlFor="le"><EnvelopeSimple size={15} weight="regular" style={{ verticalAlign: -2 }} /> Gmail</label>
-        <input id="le" type="email" value={email} onChange={(e) => setEmail(e.target.value)} autoComplete="email" placeholder="bạn@gmail.com" />
+        <input id="le" type="email" value={email} onChange={(e) => setEmail(e.target.value)} autoComplete="email" placeholder="ban@gmail.com" />
         <label htmlFor="lp"><Key size={15} weight="regular" style={{ verticalAlign: -2 }} /> Mật khẩu</label>
         <input id="lp" type="password" value={password} onChange={(e) => setPassword(e.target.value)} autoComplete="current-password" placeholder="Tối thiểu 8 ký tự" />
         {err && <p className="field-err">{err}</p>}
@@ -58,8 +58,8 @@ export function Register() {
         catch (ex) { setErr(ex.message); } finally { setBusy(false); }
       }}>
         <label htmlFor="re"><EnvelopeSimple size={15} weight="regular" style={{ verticalAlign: -2 }} /> Gmail</label>
-        <input id="re" type="email" value={email} onChange={(e) => setEmail(e.target.value)} autoComplete="email" placeholder="bạn@gmail.com" />
-        <p className="helper">Dùng Gmail that để nhận thông báo kiểm duyệt.</p>
+        <input id="re" type="email" value={email} onChange={(e) => setEmail(e.target.value)} autoComplete="email" placeholder="ban@gmail.com" />
+        <p className="helper">Dùng Gmail thật để nhận thông báo kiểm duyệt.</p>
         <label htmlFor="rn"><User size={15} weight="regular" style={{ verticalAlign: -2 }} /> Tên hiển thị</label>
         <input id="rn" value={displayName} onChange={(e) => setDisplayName(e.target.value)} maxLength={50} placeholder="Ví dụ: Minh Anh" />
         <label htmlFor="rp"><Key size={15} weight="regular" style={{ verticalAlign: -2 }} /> Mật khẩu</label>

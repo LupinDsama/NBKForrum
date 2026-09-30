@@ -9,7 +9,7 @@ export default function Footer() {
   return (
     <footer className="footer">
       <div className="wrap footer-inner">
-        <span><strong>NBK Forum</strong> Cộng đồng hoi dap và confession kiểm duyệt.</span>
+        <span><strong>NBK Forum</strong> Cộng đồng hỏi đáp và confession kiểm duyệt.</span>
         <nav aria-label="Liên kết phụ">
           <Link to="/forum">Forum</Link>
           <Link to="/confession">Confession</Link>

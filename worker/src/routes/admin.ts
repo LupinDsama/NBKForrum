@@ -154,6 +154,27 @@ export async function handleAdmin(req: Request, env: Env, url: URL): Promise<Res
     return json({ items: rows.results });
   }
 
+  // GET /api/admin/questions -> all questions incl. hidden/closed, newest first
+  if (path === '/api/admin/questions' && req.method === 'GET') {
+    const rows = await env.DB.prepare(
+      `SELECT q.*, u.display_name AS author_name FROM questions q JOIN users u ON u.id = q.author_id
+       WHERE q.status != 'deleted' ORDER BY q.created_at DESC LIMIT 100`,
+    ).all();
+    return json({ items: rows.results });
+  }
+
+  // POST /api/admin/questions/:id/delete (soft delete)
+  const delQ = path.match(/^\/api\/admin\/questions\/(\d+)\/delete$/);
+  if (delQ && req.method === 'POST') {
+    const id = Number(delQ[1]);
+    const r = await env.DB.prepare(`UPDATE questions SET status = 'deleted' WHERE id = ? AND status != 'deleted'`)
+      .bind(id)
+      .run();
+    if (r.meta.changes === 0) return err('Không tìm thấy', 404);
+    await logAdmin(env.DB, admin.id, 'delete_question', 'question', id);
+    return json({ ok: true });
+  }
+
   // POST /api/admin/posts/:id/delete (soft delete)
   const delPost = path.match(/^\/api\/admin\/posts\/(\d+)\/delete$/);
   if (delPost && req.method === 'POST') {

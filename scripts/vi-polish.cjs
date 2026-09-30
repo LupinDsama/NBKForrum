@@ -5,6 +5,36 @@ const path = require('path');
 const ROOT = path.join(__dirname, '..');
 
 const FRONT = [
+  ['hoac ten', 'hoặc tên'],
+  ['hoac ', 'hoặc '],
+  ['tac gia', 'tác giả'],
+  ['phai ', 'phải '],
+  ['khong ', 'không '],
+  ['nhung ', 'nhưng '],
+  ['theo doi', 'theo dõi'],
+  ['Moi ', 'Mới '],
+  ['duyet', 'duyệt'],
+  ['choi', 'chơi'],
+  ['Dang ', 'Đăng '],
+  ['da ', 'đã '],
+  ['hoi dap', 'hỏi đáp'],
+  ['bai ', 'bài '],
+  ['bai<', 'bài<'],
+  ['cho duyet', 'chờ duyệt'],
+  ['da duyet', 'đã duyệt'],
+  ['tu choi', 'từ chối'],
+  ['chu de', 'chủ đề'],
+  ['that', 'thật'],
+  ['thay chu ', 'thấy chữ '],
+  ['kiem soat', 'kiểm soát'],
+  [' o ', ' ở '],
+  ['kem ', 'kèm '],
+  [' co ', ' có '],
+  ['gui ', 'gửi '],
+  ['bai viet', 'bài viết'],
+  ['nguoi dung', 'người dùng'],
+  [' tu ', ' từ '],
+  [' mo', ' mở'],
   ['dang text', 'dạng text'],
   ['Khong gian', 'Không gian'],
   ['tu cach', 'tư cách'],
@@ -322,7 +352,9 @@ function walk(dir, out = []) {
 function apply(file, pairs) {
   let s = fs.readFileSync(file, 'utf8');
   let n = 0;
-  for (const [a, b] of pairs) {
+  // Longest first so specifics (da duyet) win over generics (da ).
+  const ordered = pairs.slice().sort((a, b) => b[0].length - a[0].length);
+  for (const [a, b] of ordered) {
     if (s.includes(a)) {
       s = s.split(a).join(b);
       n++;

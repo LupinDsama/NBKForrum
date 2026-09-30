@@ -32,7 +32,7 @@ export async function handleForum(req: Request, env: Env, url: URL): Promise<Res
       `SELECT q.*, u.display_name AS author_name,
         (SELECT COUNT(*) FROM answers a WHERE a.question_id = q.id) AS answer_count
        FROM questions q JOIN users u ON u.id = q.author_id
-       WHERE q.status = 'published' ORDER BY q.created_at DESC LIMIT ? OFFSET ?`,
+       WHERE q.status IN ('published', 'closed') ORDER BY q.created_at DESC LIMIT ? OFFSET ?`,
     )
       .bind(limit, offset)
       .all();
@@ -68,6 +68,10 @@ export async function handleForum(req: Request, env: Env, url: URL): Promise<Res
       .bind(id)
       .first<any>();
     if (!q) return err('Không tìm thấy', 404);
+    if (q.status !== 'published' && q.status !== 'closed') {
+      const viewer = await getSessionUser(req, env);
+      if (!viewer || (viewer.id !== q.author_id && viewer.role !== 'admin')) return err('Không tìm thấy', 404);
+    }
     await env.DB.prepare(`UPDATE questions SET views = views + 1 WHERE id = ?`).bind(id).run();
     const answers = await env.DB.prepare(
       `SELECT a.*, u.display_name AS author_name FROM answers a JOIN users u ON u.id = a.author_id
@@ -88,6 +92,18 @@ export async function handleForum(req: Request, env: Env, url: URL): Promise<Res
       answerComments = cc.results;
     }
     return json({ question: q, answers: answers.results, answerComments });
+  }
+
+  // DELETE /api/questions/:id (owner or admin, soft delete)
+  if (qm && req.method === 'DELETE') {
+    const user = await getSessionUser(req, env);
+    if (!user) return err('Bạn chưa đăng nhập', 401);
+    const id = Number(qm[1]);
+    const row = await env.DB.prepare(`SELECT author_id FROM questions WHERE id = ?`).bind(id).first<any>();
+    if (!row) return err('Không tìm thấy', 404);
+    if (row.author_id !== user.id && user.role !== 'admin') return err('Bạn không có quyền', 403);
+    await env.DB.prepare(`UPDATE questions SET status = 'deleted' WHERE id = ?`).bind(id).run();
+    return json({ ok: true });
   }
 
   // POST /api/questions/:id/answers {content}
