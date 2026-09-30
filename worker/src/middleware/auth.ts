@@ -41,7 +41,7 @@ export async function getSessionUser(req: Request, env: Env): Promise<AuthUser |
 export async function requireAuth(req: Request, env: Env): Promise<{ user: AuthUser } | { response: Response }> {
   const user = await getSessionUser(req, env);
   if (!user) {
-    return { response: new Response(JSON.stringify({ error: 'Unauthorized' }), { status: 401 }) };
+    return { response: new Response(JSON.stringify({ error: 'Bạn chưa đăng nhập' }), { status: 401 }) };
   }
   return { user };
 }

@@ -13,7 +13,7 @@ export function rateLimit(req: Request, key: string, limit = 30, windowSec = 60)
   }
   cur.n += 1;
   if (cur.n > limit) {
-    return new Response(JSON.stringify({ error: 'Too many requests' }), { status: 429 });
+    return new Response(JSON.stringify({ error: 'Bạn thao tác quá nhanh, thử lại sau' }), { status: 429 });
   }
   return null;
 }

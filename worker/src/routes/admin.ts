@@ -28,7 +28,7 @@ export async function handleAdmin(req: Request, env: Env, url: URL): Promise<Res
   // GET /api/admin/confessions?status=pending
   if (path === '/api/admin/confessions' && req.method === 'GET') {
     const status = url.searchParams.get('status') ?? 'pending';
-    if (!['pending', 'approved', 'rejected'].includes(status)) return err('Invalid status', 400);
+    if (!['pending', 'approved', 'rejected'].includes(status)) return err('Trạng thái không hợp lệ', 400);
     const rows = await env.DB.prepare(
       `SELECT cf.*, u.email AS author_email, u.display_name AS author_name
        FROM confessions cf LEFT JOIN users u ON u.id = cf.author_id
@@ -50,7 +50,7 @@ export async function handleAdmin(req: Request, env: Env, url: URL): Promise<Res
     )
       .bind(admin.id, now, now, id)
       .run();
-    if (r.meta.changes === 0) return err('Not found or not pending', 404);
+    if (r.meta.changes === 0) return err('Bài không tồn tại hoặc đã được xử lý', 404);
     await logAdmin(env.DB, admin.id, 'approve_confession', 'confession', id);
     const cfA = await env.DB.prepare(`SELECT author_id FROM confessions WHERE id = ?`).bind(id).first<any>();
     if (cfA?.author_id) {
@@ -69,7 +69,7 @@ export async function handleAdmin(req: Request, env: Env, url: URL): Promise<Res
   if (reject && req.method === 'POST') {
     const id = Number(reject[1]);
     const body: any = await req.json().catch(() => ({}));
-    const reason = str(body?.reason ?? body?.rejection_reason, 1000) ?? 'Rejected';
+    const reason = str(body?.reason ?? body?.rejection_reason, 1000) ?? 'Không phù hợp';
     const now = Math.floor(Date.now() / 1000);
     const r = await env.DB.prepare(
       `UPDATE confessions SET status = 'rejected', reviewed_by = ?, reviewed_at = ?, rejection_reason = ?
@@ -77,7 +77,7 @@ export async function handleAdmin(req: Request, env: Env, url: URL): Promise<Res
     )
       .bind(admin.id, now, reason, id)
       .run();
-    if (r.meta.changes === 0) return err('Not found or not pending', 404);
+    if (r.meta.changes === 0) return err('Bài không tồn tại hoặc đã được xử lý', 404);
     await logAdmin(env.DB, admin.id, 'reject_confession', 'confession', id, { reason });
     const cfR = await env.DB.prepare(`SELECT author_id FROM confessions WHERE id = ?`).bind(id).first<any>();
     if (cfR?.author_id) {
@@ -120,7 +120,7 @@ export async function handleAdmin(req: Request, env: Env, url: URL): Promise<Res
   const roleM = path.match(/^\/api\/admin\/users\/(\d+)\/role$/);
   if (roleM && req.method === 'POST') {
     const body: any = await req.json().catch(() => ({}));
-    if (!['user', 'admin'].includes(body?.role)) return err('role must be user|admin', 400);
+    if (!['user', 'admin'].includes(body?.role)) return err('Vai trò phải là user hoặc admin', 400);
     await env.DB.prepare(`UPDATE users SET role = ? WHERE id = ?`).bind(body.role, Number(roleM[1])).run();
     await logAdmin(env.DB, admin.id, 'set_role', 'user', Number(roleM[1]), { role: body.role });
     return json({ ok: true });
@@ -161,7 +161,7 @@ export async function handleAdmin(req: Request, env: Env, url: URL): Promise<Res
     const r = await env.DB.prepare(`UPDATE posts SET status = 'deleted' WHERE id = ? AND status != 'deleted'`)
       .bind(id)
       .run();
-    if (r.meta.changes === 0) return err('Not found', 404);
+    if (r.meta.changes === 0) return err('Không tìm thấy', 404);
     await logAdmin(env.DB, admin.id, 'delete_post', 'post', id);
     return json({ ok: true });
   }
@@ -171,7 +171,7 @@ export async function handleAdmin(req: Request, env: Env, url: URL): Promise<Res
   if (delConf && req.method === 'POST') {
     const id = Number(delConf[1]);
     const exists = await env.DB.prepare(`SELECT id FROM confessions WHERE id = ?`).bind(id).first();
-    if (!exists) return err('Not found', 404);
+    if (!exists) return err('Không tìm thấy', 404);
     await env.DB.batch([
       env.DB.prepare(`DELETE FROM reactions WHERE target_type = 'confession' AND target_id = ?`).bind(id),
       env.DB.prepare(`DELETE FROM comments WHERE target_type = 'confession' AND target_id = ?`).bind(id),
@@ -181,5 +181,5 @@ export async function handleAdmin(req: Request, env: Env, url: URL): Promise<Res
     return json({ ok: true });
   }
 
-  return err('Admin route not found', 404);
+  return err('Không tìm thấy chức năng admin', 404);
 }

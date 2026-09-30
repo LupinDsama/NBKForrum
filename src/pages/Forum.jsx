@@ -64,10 +64,10 @@ export default function Forum() {
   return (
     <div className="wrap page">
       <h1>Forum</h1>
-      <p className="muted" style={{ maxWidth: '62ch' }}>Thao luan theo chuyen muc, dat cau hoi va tra loi cong dong. Bai viet hien ngay, confession phai qua kiem duyet.</p>
+      <p className="muted" style={{ maxWidth: '62ch' }}>Thảo luận theo chuyên mục, đặt câu hỏi và trả lời cộng đồng. Bài viết hiện ngay, confession phai qua kiểm duyệt.</p>
 
-      <div className="pills" aria-label="Loc theo chuyen muc">
-        <button className="pill" aria-pressed={!activeCat} onClick={() => setParams({})}>Tat ca</button>
+      <div className="pills" aria-label="Lọc theo chuyên mục">
+        <button className="pill" aria-pressed={!activeCat} onClick={() => setParams({})}>Tất cả</button>
         {categories.map((c) => (
           <button key={c.id} className="pill" aria-pressed={activeCat === c.slug} onClick={() => setParams({ category: c.slug })}>{c.name}</button>
         ))}
@@ -76,34 +76,34 @@ export default function Forum() {
       <div className="row" style={{ marginBottom: 6 }}>
         <span style={{ position: 'relative', flex: '1 1 240px', maxWidth: 380 }}>
           <MagnifyingGlass size={17} weight="regular" style={{ position: 'absolute', left: 12, top: 12 }} />
-          <input aria-label="Tim bai viet" placeholder="Tim theo tieu de hoac tac gia" value={q} onChange={(e) => setQ(e.target.value)} style={{ paddingLeft: 36 }} />
+          <input aria-label="Tìm bài viết" placeholder="Tìm theo tiêu đề hoac tac gia" value={q} onChange={(e) => setQ(e.target.value)} style={{ paddingLeft: 36 }} />
         </span>
       </div>
 
-      <div className="tabs" role="tablist" aria-label="Loai noi dung">
-        <button role="tab" className="tab" aria-selected={tab === 'posts'} onClick={() => setTab('posts')}><PencilSimple size={16} weight="regular" style={{ verticalAlign: -2 }} /> Bai viet</button>
-        <button role="tab" className="tab" aria-selected={tab === 'questions'} onClick={() => setTab('questions')}><Question size={16} weight="regular" style={{ verticalAlign: -2 }} /> Hoi dap</button>
+      <div className="tabs" role="tablist" aria-label="Loai nội dung">
+        <button role="tab" className="tab" aria-selected={tab === 'posts'} onClick={() => setTab('posts')}><PencilSimple size={16} weight="regular" style={{ verticalAlign: -2 }} /> Bài viết</button>
+        <button role="tab" className="tab" aria-selected={tab === 'questions'} onClick={() => setTab('questions')}><Question size={16} weight="regular" style={{ verticalAlign: -2 }} /> Hỏi đáp</button>
       </div>
 
       {tab === 'posts' && (
         <>
           {user && (
             <form className="card" onSubmit={submitPost}>
-              <label htmlFor="pt">Tieu de bai viet</label>
-              <input id="pt" value={title} onChange={(e) => setTitle(e.target.value)} maxLength={200} placeholder="Vi du: Cach on thi Vat ly hieu qua" />
-              <label htmlFor="pc">Noi dung</label>
-              <textarea id="pc" rows={4} value={content} onChange={(e) => setContent(e.target.value)} placeholder="Mo ta chi tiet van de cua ban" />
-              <p className="helper">Toi da 200 ky tu tieu de, noi dung van minh.</p>
+              <label htmlFor="pt">Tiêu đề bai viet</label>
+              <input id="pt" value={title} onChange={(e) => setTitle(e.target.value)} maxLength={200} placeholder="Ví dụ: Cách ôn thì Vật lý hiệu quả" />
+              <label htmlFor="pc">Nội dung</label>
+              <textarea id="pc" rows={4} value={content} onChange={(e) => setContent(e.target.value)} placeholder="Mô tả chi tiet van để của bạn" />
+              <p className="helper">Tối đa 200 ký tự tiêu đề, nội dung văn minh.</p>
               {err && <p className="field-err">{err}</p>}
               <div className="row" style={{ marginTop: 12 }}>
                 <button className="btn btn-primary" type="submit" disabled={!title.trim() || !content.trim()}>Dang bai</button>
               </div>
             </form>
           )}
-          <h2 style={{ marginTop: 26 }}>Bai viet{activeCat ? ` trong ${activeCat}` : ''}</h2>
+          <h2 style={{ marginTop: 26 }}>Bài viết{activeCat ? ` trong ${activeCat}` : ''}</h2>
           {filteredPosts === null && <SkeletonList rows={4} />}
           {filteredPosts !== null && filteredPosts.length === 0 && (
-            <EmptyState title="Chua co bai viet" hint={user ? 'Hay tao bai dau tien cho chu de nay.' : 'Dang nhap de dang bai dau tien.'} />
+            <EmptyState title="Chưa có bai viet" hint={user ? 'Hãy tạo bài đầu tiên cho chu để này.' : 'Đăng nhập để đăng bài đầu tiên.'} />
           )}
           {filteredPosts !== null && filteredPosts.length > 0 && (
             <div className="list">
@@ -113,7 +113,7 @@ export default function Forum() {
                     <Avatar name={p.author_name} />
                     <div>
                       <Link to={`/posts/${p.id}`} className="post-title">{p.title}</Link>
-                      <div className="meta"><span>{p.author_name}</span><span>{timeAgo(p.created_at)}</span>{p.category_name && <span>{p.category_name}</span>}<span>{p.views} luot xem</span></div>
+                      <div className="meta"><span>{p.author_name}</span><span>{timeAgo(p.created_at)}</span>{p.category_name && <span>{p.category_name}</span>}<span>{p.views} lượt xem</span></div>
                     </div>
                   </div>
                 </article>
@@ -127,19 +127,19 @@ export default function Forum() {
         <>
           {user && (
             <form className="card" onSubmit={submitQuestion}>
-              <label htmlFor="qt">Cau hoi</label>
-              <input id="qt" value={qTitle} onChange={(e) => setQTitle(e.target.value)} maxLength={200} placeholder="Vi du: Giai phuong trinh nay the nao" />
-              <label htmlFor="qc">Chi tiet</label>
-              <textarea id="qc" rows={4} value={qContent} onChange={(e) => setQContent(e.target.value)} placeholder="Ban da thu cach nao" />
+              <label htmlFor="qt">Câu hỏi</label>
+              <input id="qt" value={qTitle} onChange={(e) => setQTitle(e.target.value)} maxLength={200} placeholder="Ví dụ: Giải phương trình này thế nào" />
+              <label htmlFor="qc">Chi tiết</label>
+              <textarea id="qc" rows={4} value={qContent} onChange={(e) => setQContent(e.target.value)} placeholder="Bạn đã thử cách nào" />
               {qErr && <p className="field-err">{qErr}</p>}
               <div className="row" style={{ marginTop: 12 }}>
-                <button className="btn btn-primary" type="submit" disabled={!qTitle.trim() || !qContent.trim()}>Dat cau hoi</button>
+                <button className="btn btn-primary" type="submit" disabled={!qTitle.trim() || !qContent.trim()}>Đặt câu hỏi</button>
               </div>
             </form>
           )}
-          <h2 style={{ marginTop: 26 }}>Cau hoi moi</h2>
+          <h2 style={{ marginTop: 26 }}>Câu hỏi mới</h2>
           {questions === null && <SkeletonList rows={4} />}
-          {questions !== null && questions.length === 0 && <EmptyState title="Chua co cau hoi" hint="Dat cau hoi dau tien de cong dong giup ban." />}
+          {questions !== null && questions.length === 0 && <EmptyState title="Chưa có cau hoi" hint="Đặt câu hỏi dau tien để cộng đồng giúp bạn." />}
           {questions !== null && questions.length > 0 && (
             <div className="list">
               {questions.map((item) => (
@@ -148,7 +148,7 @@ export default function Forum() {
                     <Avatar name={item.author_name} />
                     <div>
                       <Link to={`/questions/${item.id}`} className="post-title">{item.title}</Link>
-                      <div className="meta"><span>{item.author_name}</span><span>{timeAgo(item.created_at)}</span><span>{item.answer_count} tra loi</span></div>
+                      <div className="meta"><span>{item.author_name}</span><span>{timeAgo(item.created_at)}</span><span>{item.answer_count} trả lời</span></div>
                     </div>
                   </div>
                 </article>

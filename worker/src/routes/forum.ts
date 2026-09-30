@@ -8,6 +8,23 @@ import { rateLimit } from '../middleware/rateLimit.js';
 export async function handleForum(req: Request, env: Env, url: URL): Promise<Response | null> {
   const path = url.pathname;
 
+// GET /api/users/search?q= (public directory: id + display_name only, for @mentions)
+  if (path === '/api/users/search' && req.method === 'GET') {
+    const rl = rateLimit(req, 'usearch', 30, 60);
+    if (rl) return rl;
+    const q = (url.searchParams.get('q') ?? '').trim().slice(0, 30);
+    const rows = q
+      ? await env.DB.prepare(
+          `SELECT id, display_name FROM users WHERE status = 'active' AND display_name LIKE ? ORDER BY display_name ASC LIMIT 8`,
+        )
+          .bind(`%${q}%`)
+          .all()
+      : await env.DB.prepare(
+          `SELECT id, display_name FROM users WHERE status = 'active' ORDER BY id DESC LIMIT 8`,
+        ).all();
+    return json({ items: rows.results });
+  }
+
   if (path === '/api/questions' && req.method === 'GET') {
     const limit = Math.min(Number(url.searchParams.get('limit') ?? 20), 50);
     const offset = Number(url.searchParams.get('offset') ?? 0);
@@ -24,14 +41,14 @@ export async function handleForum(req: Request, env: Env, url: URL): Promise<Res
 
   if (path === '/api/questions' && req.method === 'POST') {
     const user = await getSessionUser(req, env);
-    if (!user) return err('Unauthorized', 401);
+    if (!user) return err('Bạn chưa đăng nhập', 401);
     const rl = rateLimit(req, 'question', 10, 600);
     if (rl) return rl;
     const body: any = await req.json().catch(() => null);
-    if (!body) return err('Invalid JSON', 400);
+    if (!body) return err('Dữ liệu không hợp lệ', 400);
     const title = str(body.title, 200);
     const content = str(body.content, 50000);
-    if (!title || !content) return err('title/content required', 400);
+    if (!title || !content) return err('Tiêu đề và nội dung là bắt buộc', 400);
     const now = Math.floor(Date.now() / 1000);
     const r = await env.DB.prepare(
       `INSERT INTO questions (author_id, category_id, title, content, status, views, created_at, updated_at)
@@ -50,7 +67,7 @@ export async function handleForum(req: Request, env: Env, url: URL): Promise<Res
     )
       .bind(id)
       .first<any>();
-    if (!q) return err('Not found', 404);
+    if (!q) return err('Không tìm thấy', 404);
     await env.DB.prepare(`UPDATE questions SET views = views + 1 WHERE id = ?`).bind(id).run();
     const answers = await env.DB.prepare(
       `SELECT a.*, u.display_name AS author_name FROM answers a JOIN users u ON u.id = a.author_id
@@ -77,10 +94,10 @@ export async function handleForum(req: Request, env: Env, url: URL): Promise<Res
   const am = path.match(/^\/api\/questions\/(\d+)\/answers$/);
   if (am && req.method === 'POST') {
     const user = await getSessionUser(req, env);
-    if (!user) return err('Unauthorized', 401);
+    if (!user) return err('Bạn chưa đăng nhập', 401);
     const body: any = await req.json().catch(() => null);
     const content = str(body?.content, 20000);
-    if (!content) return err('content required', 400);
+    if (!content) return err('Nội dung là bắt buộc', 400);
     const now = Math.floor(Date.now() / 1000);
     const r = await env.DB.prepare(
       `INSERT INTO answers (question_id, author_id, content, is_accepted, created_at, updated_at)
@@ -95,12 +112,12 @@ export async function handleForum(req: Request, env: Env, url: URL): Promise<Res
   const acc = path.match(/^\/api\/answers\/(\d+)\/accept$/);
   if (acc && req.method === 'POST') {
     const user = await getSessionUser(req, env);
-    if (!user) return err('Unauthorized', 401);
+    if (!user) return err('Bạn chưa đăng nhập', 401);
     const ans = await env.DB.prepare(`SELECT * FROM answers WHERE id = ?`).bind(Number(acc[1])).first<any>();
-    if (!ans) return err('Not found', 404);
+    if (!ans) return err('Không tìm thấy', 404);
     const q = await env.DB.prepare(`SELECT * FROM questions WHERE id = ?`).bind(ans.question_id).first<any>();
-    if (!q) return err('Not found', 404);
-    if (q.author_id !== user.id && user.role !== 'admin') return err('Forbidden', 403);
+    if (!q) return err('Không tìm thấy', 404);
+    if (q.author_id !== user.id && user.role !== 'admin') return err('Bạn không có quyền', 403);
     await env.DB.batch([
       env.DB.prepare(`UPDATE answers SET is_accepted = 0 WHERE question_id = ?`).bind(q.id),
       env.DB.prepare(`UPDATE answers SET is_accepted = 1 WHERE id = ?`).bind(ans.id),
@@ -113,21 +130,21 @@ export async function handleForum(req: Request, env: Env, url: URL): Promise<Res
   // parent_id = reply to another comment on the same target. Mentions (@name) are plain text.
   if (path === '/api/comments' && req.method === 'POST') {
     const user = await getSessionUser(req, env);
-    if (!user) return err('Unauthorized', 401);
+    if (!user) return err('Bạn chưa đăng nhập', 401);
     const body: any = await req.json().catch(() => null);
     const content = str(body?.content, 5000);
     if (!content || !['post', 'question', 'answer', 'confession'].includes(body?.target_type) || !Number.isInteger(body?.target_id)) {
-      return err('target_type (post|question|answer|confession), target_id, content required', 400);
+      return err('Thiếu loại, id hoặc nội dung', 400);
     }
     let parentId: number | null = null;
     if (body?.parent_id != null) {
-      if (!Number.isInteger(body.parent_id)) return err('parent_id must be numeric', 400);
+      if (!Number.isInteger(body.parent_id)) return err('parent_id phải là số', 400);
       const parent = await env.DB.prepare(
         `SELECT id FROM comments WHERE id = ? AND target_type = ? AND target_id = ?`,
       )
         .bind(body.parent_id, body.target_type, body.target_id)
         .first();
-      if (!parent) return err('Parent comment not found on this target', 404);
+      if (!parent) return err('Không tìm thấy bình luận gốc', 404);
       parentId = body.parent_id;
     }
     const now = Math.floor(Date.now() / 1000);
@@ -144,11 +161,11 @@ export async function handleForum(req: Request, env: Env, url: URL): Promise<Res
   const del = path.match(/^\/api\/comments\/(\d+)$/);
   if (del && req.method === 'DELETE') {
     const user = await getSessionUser(req, env);
-    if (!user) return err('Unauthorized', 401);
+    if (!user) return err('Bạn chưa đăng nhập', 401);
     const id = Number(del[1]);
     const row = await env.DB.prepare(`SELECT author_id FROM comments WHERE id = ?`).bind(id).first<any>();
-    if (!row) return err('Not found', 404);
-    if (row.author_id !== user.id && user.role !== 'admin') return err('Forbidden', 403);
+    if (!row) return err('Không tìm thấy', 404);
+    if (row.author_id !== user.id && user.role !== 'admin') return err('Bạn không có quyền', 403);
     await env.DB.prepare(
       `WITH RECURSIVE sub(id) AS (
          SELECT ? UNION ALL SELECT c.id FROM comments c JOIN sub s ON c.parent_id = s.id
@@ -167,10 +184,10 @@ export async function handleForum(req: Request, env: Env, url: URL): Promise<Res
   }
   if (path === '/api/reports' && req.method === 'POST') {
     const user = await getSessionUser(req, env);
-    if (!user) return err('Unauthorized', 401);
+    if (!user) return err('Bạn chưa đăng nhập', 401);
     const body: any = await req.json().catch(() => null);
     const reason = str(body?.reason, 200);
-    if (!reason || !body?.target_type || !Number.isInteger(body?.target_id)) return err('target_type, target_id, reason required', 400);
+    if (!reason || !body?.target_type || !Number.isInteger(body?.target_id)) return err('Thiếu đối tượng hoặc lý do', 400);
     const now = Math.floor(Date.now() / 1000);
     const r = await env.DB.prepare(
       `INSERT INTO reports (reporter_id, target_type, target_id, reason, description, status, created_at)
@@ -190,7 +207,7 @@ export async function handleForum(req: Request, env: Env, url: URL): Promise<Res
   // GET /api/notifications (own)
   if (path === '/api/notifications' && req.method === 'GET') {
     const user = await getSessionUser(req, env);
-    if (!user) return err('Unauthorized', 401);
+    if (!user) return err('Bạn chưa đăng nhập', 401);
     const rows = await env.DB.prepare(`SELECT * FROM notifications WHERE user_id = ? ORDER BY created_at DESC LIMIT 50`)
       .bind(user.id)
       .all();

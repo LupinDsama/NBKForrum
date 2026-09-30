@@ -5,6 +5,7 @@ import { useAuth } from '../context/AuthContext.jsx';
 import { api, timeAgo } from '../api/client.js';
 import { Avatar } from './ui.jsx';
 import Reactions from './Reactions.jsx';
+import MentionTextarea from './MentionTextarea.jsx';
 
 // Render @mentions as highlighted tokens. Content stays plain text.
 export function MentionText({ text }) {
@@ -35,7 +36,7 @@ function CommentNode({ node, targetType, targetId, onReply, onChanged, depth }) 
   const canDelete = user && (user.id === node.author_id || user.role === 'admin');
 
   async function recall() {
-    if (!window.confirm('Thu hoi binh luan nay? Cac tra loi ben duoi cung bi xoa.')) return;
+    if (!window.confirm('Thu hồi bình luận này? Cac trả lời bên dưới cũng bị xóa.')) return;
     await api.delete(`/api/comments/${node.id}`);
     onChanged && onChanged();
   }
@@ -47,11 +48,11 @@ function CommentNode({ node, targetType, targetId, onReply, onChanged, depth }) 
         <p style={{ margin: '8px 0' }}><MentionText text={node.content} /></p>
         <div className="row">
           <button className="btn btn-ghost" style={{ padding: '6px 14px', fontSize: 13 }} onClick={() => onReply(node)}>
-            <ChatCircle size={15} weight="regular" />Tra loi
+            <ChatCircle size={15} weight="regular" />Trả lời
           </button>
           {canDelete && (
             <button className="btn btn-ghost" style={{ padding: '6px 14px', fontSize: 13 }} onClick={recall}>
-              <ArrowBendUpLeft size={15} weight="regular" />Thu hoi
+              <ArrowBendUpLeft size={15} weight="regular" />Thu hồi
             </button>
           )}
           <Reactions targetType="comment" targetId={node.id} />
@@ -100,7 +101,7 @@ export default function CommentThread({ targetType, targetId, comments, onChange
 
   return (
     <div>
-      {tree.length === 0 && <p className="muted">Chua co binh luan. Hay la nguoi dau tien chia se goc nhin.</p>}
+      {tree.length === 0 && <p className="muted">Chưa có bình luận. Hãy là người đầu tiên chia sẻ góc nhìn.</p>}
       <div className="list">
         {tree.map((n) => (
           <CommentNode key={n.id} node={n} targetType={targetType} targetId={targetId} onReply={startReply} onChanged={onChanged} depth={0} />
@@ -109,22 +110,22 @@ export default function CommentThread({ targetType, targetId, comments, onChange
       {!hideForm && (user ? (
         <form className="card" style={{ marginTop: 12 }} onSubmit={submit}>
           <label htmlFor={`comment-box-${targetType}-${targetId}`}>
-            {replyTo ? <>Tra loi {replyTo.author_name}</> : 'Binh luan cua ban'}
+            {replyTo ? <>Trả lời {replyTo.author_name}</> : 'Bình luận của bạn'}
           </label>
           {replyTo && (
-            <p className="helper">Dang tra loi <span className="mention">@{replyTo.author_name}</span> <button type="button" className="btn btn-ghost" style={{ padding: '2px 10px', fontSize: 12 }} onClick={() => { setReplyTo(null); setDraft(''); }}>Huy</button></p>
+            <p className="helper">Đang trả lời <span className="mention">@{replyTo.author_name}</span> <button type="button" className="btn btn-ghost" style={{ padding: '2px 10px', fontSize: 12 }} onClick={() => { setReplyTo(null); setDraft(''); }}>Hủy</button></p>
           )}
-          <textarea
+          <MentionTextarea
             id={`comment-box-${targetType}-${targetId}`} rows={3} value={draft}
             onChange={(e) => setDraft(e.target.value)} maxLength={5000}
-            placeholder="Viet lich su, dung trong tam. Go @ten de tag ai do" />
+            placeholder="Viết lịch sự, đúng trọng tâm. Gõ @ để tag tên ai đó" />
           {err && <p className="field-err">{err}</p>}
           <div className="row" style={{ marginTop: 10 }}>
-            <button className="btn btn-primary" type="submit" disabled={!draft.trim()}>Gui binh luan</button>
+            <button className="btn btn-primary" type="submit" disabled={!draft.trim()}>Gửi bình luận</button>
           </div>
         </form>
       ) : (
-        <p className="notice" style={{ marginTop: 12 }}><Link to="/login">Dang nhap</Link> de binh luan va tra loi.</p>
+        <p className="notice" style={{ marginTop: 12 }}><Link to="/login">Đăng nhập</Link> để bình luận và trả lời.</p>
       ))}
     </div>
   );

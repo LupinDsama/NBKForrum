@@ -5,9 +5,9 @@ import { useAuth } from '../context/AuthContext.jsx';
 import { api, apiUrl } from '../api/client.js';
 
 const KINDS = [
-  { kind: 'like', label: 'Thich', Icon: ThumbsUp },
+  { kind: 'like', label: 'Thích', Icon: ThumbsUp },
   { kind: 'haha', label: 'Haha', Icon: SmileyWink },
-  { kind: 'angry', label: 'Phan no', Icon: SmileyAngry },
+  { kind: 'angry', label: 'Phẫn nộ', Icon: SmileyAngry },
 ];
 
 // Compact reaction bar for post / question / answer / confession / comment.
@@ -46,21 +46,21 @@ export default function Reactions({ targetType, targetId }) {
   }
 
   return (
-    <div className="reactions" role="group" aria-label="Cam xuc">
+    <div className="reactions" role="group" aria-label="Cảm xúc">
       {KINDS.map(({ kind, label, Icon }) => (
         <button
           key={kind}
           className="react-btn"
           aria-pressed={mine === kind}
           aria-label={`${label}: ${counts[kind] || 0}`}
-          title={user ? label : 'Dang nhap de tha cam xuc'}
+          title={user ? label : 'Đăng nhập để thả cảm xúc'}
           onClick={() => react(kind)}
           disabled={!user}
         >
           <Icon size={17} weight={mine === kind ? 'fill' : 'regular'} />{counts[kind] || 0}
         </button>
       ))}
-      {!user && <Link to="/login" className="muted" style={{ fontSize: 13 }}>Dang nhap de bieu cam</Link>}
+      {!user && <Link to="/login" className="muted" style={{ fontSize: 13 }}>Đăng nhập để biểu cảm</Link>}
     </div>
   );
 }

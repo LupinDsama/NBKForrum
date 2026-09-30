@@ -53,7 +53,7 @@ export default {
     if (url.pathname === '/api/admin/seed-categories' && request.method === 'POST') {
       const { getSessionUser } = await import('./middleware/auth.js');
       const user = await getSessionUser(request, env);
-      if (!user || user.role !== 'admin') return json({ error: 'Forbidden' }, 403);
+      if (!user || user.role !== 'admin') return json({ error: 'Bạn không có quyền' }, 403);
       const now = Math.floor(Date.now() / 1000);
       for (const [name, slug] of [
         ['Programming', 'programming'],
@@ -69,7 +69,7 @@ export default {
       return json({ ok: true });
     }
 
-    if (url.pathname.startsWith('/api/')) return json({ error: 'Not found' }, 404);
+    if (url.pathname.startsWith('/api/')) return json({ error: 'Không tìm thấy' }, 404);
 
     // Frontend static assets + SPA fallback to index.html
     const asset = await env.ASSETS.fetch(request);

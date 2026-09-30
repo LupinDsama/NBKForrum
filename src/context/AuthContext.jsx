@@ -28,7 +28,7 @@ export function AuthProvider({ children }) {
       body: JSON.stringify({ email, password }),
     });
     const data = await r.json().catch(() => ({}));
-    if (!r.ok) throw new Error(data.error || 'Login failed');
+    if (!r.ok) throw new Error(data.error || 'Đăng nhập thất bại');
     setUser(data);
   }
 
@@ -39,7 +39,7 @@ export function AuthProvider({ children }) {
       body: JSON.stringify({ email, password, displayName }),
     });
     const data = await r.json().catch(() => ({}));
-    if (!r.ok) throw new Error(data.error || 'Register failed');
+    if (!r.ok) throw new Error(data.error || 'Đăng ký thất bại');
     setUser(data);
   }
 

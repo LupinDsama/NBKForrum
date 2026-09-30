@@ -21,18 +21,18 @@ export default function Navbar({ theme, onTheme }) {
           <span className="brand-mark">N</span>NBK Forum
         </Link>
         <button
-          className="icon-btn menu-btn" aria-label="Mo menu" aria-expanded={open}
+          className="icon-btn menu-btn" aria-label="Mở menu" aria-expanded={open}
           onClick={() => setOpen((v) => !v)}
         >
           <List size={20} weight="regular" />
         </button>
         {!user && (
           <span className="mobile-auth">
-            <Link to="/login" onClick={() => setOpen(false)}>Dang nhap</Link>
-            <Link to="/register" className="btn btn-primary" style={{ padding: '7px 16px', fontSize: 13.5 }} onClick={() => setOpen(false)}>Dang ky</Link>
+            <Link to="/login" onClick={() => setOpen(false)}>Đăng nhập</Link>
+            <Link to="/register" className="btn btn-primary" style={{ padding: '7px 16px', fontSize: 13.5 }} onClick={() => setOpen(false)}>Đăng ký</Link>
           </span>
         )}
-        <nav className={`nav-links${open ? ' open' : ''}`} aria-label="Dieu huong chinh">
+        <nav className={`nav-links${open ? ' open' : ''}`} aria-label="Điều hướng chính">
           <NavLink to="/forum" onClick={() => setOpen(false)}>Forum</NavLink>
           <NavLink to="/confession" onClick={() => setOpen(false)}>Confession</NavLink>
           {isAdmin && <NavLink to="/admin" onClick={() => setOpen(false)}>Admin</NavLink>}
@@ -40,16 +40,16 @@ export default function Navbar({ theme, onTheme }) {
             <>
               <span className="meta"><UserCircle size={18} weight="regular" />{user.displayName}</span>
               <button className="btn btn-ghost" onClick={onLogout}>
-                <SignOut size={17} weight="regular" />Dang xuat
+                <SignOut size={17} weight="regular" />Đăng xuất
               </button>
             </>
           ) : (
             <>
-              <NavLink to="/login" onClick={() => setOpen(false)}>Dang nhap</NavLink>
-              <NavLink to="/register" className="btn btn-primary" onClick={() => setOpen(false)}>Dang ky</NavLink>
+              <NavLink to="/login" onClick={() => setOpen(false)}>Đăng nhập</NavLink>
+              <NavLink to="/register" className="btn btn-primary" onClick={() => setOpen(false)}>Đăng ký</NavLink>
             </>
           )}
-          <button className="icon-btn" aria-label="Doi giao dien" onClick={onTheme}>
+          <button className="icon-btn" aria-label="Đổi giao diện" onClick={onTheme}>
             {theme === 'dark' ? <Sun size={18} weight="regular" /> : <Moon size={18} weight="regular" />}
           </button>
         </nav>

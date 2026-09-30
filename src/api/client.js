@@ -5,7 +5,7 @@ export const apiUrl = (path) => `${API_BASE}${path}`;
 
 async function parse(res) {
   const data = await res.json().catch(() => ({}));
-  if (!res.ok) throw new Error(data.error || `Request failed (${res.status})`);
+  if (!res.ok) throw new Error(data.error || `Lỗi mạng (${res.status})`);
   return data;
 }
 
@@ -27,11 +27,11 @@ export const api = {
 export function timeAgo(ts) {
   if (!ts) return '';
   const s = Math.floor(Date.now() / 1000) - Number(ts);
-  if (s < 60) return 'vua xong';
-  if (s < 3600) return `${Math.floor(s / 60)} phut truoc`;
-  if (s < 86400) return `${Math.floor(s / 3600)} gio truoc`;
+  if (s < 60) return 'vừa xong';
+  if (s < 3600) return `${Math.floor(s / 60)} phút trước`;
+  if (s < 86400) return `${Math.floor(s / 3600)} giờ trước`;
   const d = Math.floor(s / 86400);
-  if (d < 30) return `${d} ngay truoc`;
+  if (d < 30) return `${d} ngày trước`;
   return new Date(Number(ts) * 1000).toLocaleDateString('vi-VN');
 }
 

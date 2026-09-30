@@ -4,6 +4,7 @@ import { Check, X, MagnifyingGlass, Trash, ChatCircle } from '@phosphor-icons/re
 import { api, timeAgo } from '../api/client.js';
 import { Avatar, SkeletonList, EmptyState } from '../components/ui.jsx';
 import CommentThread from '../components/Comments.jsx';
+import MentionTextarea from '../components/MentionTextarea.jsx';
 import { MentionText } from '../components/Comments.jsx';
 
 function ApprovedConfession({ c, onChanged }) {
@@ -29,7 +30,7 @@ function ApprovedConfession({ c, onChanged }) {
   }
 
   async function remove() {
-    if (!window.confirm(`Xoa confession #${c.id} vinh vien?`)) return;
+    if (!window.confirm(`Xóa confession #${c.id} vĩnh viễn?`)) return;
     await api.post(`/api/admin/confessions/${c.id}/delete`, {});
     onChanged();
   }
@@ -40,10 +41,10 @@ function ApprovedConfession({ c, onChanged }) {
       <p><MentionText text={c.content} /></p>
       <div className="row">
         <button className="btn btn-ghost" style={{ padding: '6px 14px', fontSize: 13 }} onClick={toggle}>
-          <ChatCircle size={15} weight="regular" />Binh luan voi tu cach admin
+          <ChatCircle size={15} weight="regular" />Bình luận với tư cách admin
         </button>
         <button className="btn btn-ghost" style={{ padding: '6px 14px', fontSize: 13 }} onClick={remove}>
-          <Trash size={15} weight="regular" />Xoa bai
+          <Trash size={15} weight="regular" />Xóa bài
         </button>
       </div>
       {open && (
@@ -54,10 +55,10 @@ function ApprovedConfession({ c, onChanged }) {
                 setDetail(await api.get(`/api/confessions/${c.id}`).catch(() => detail));
               }} hideForm />
               <form className="card card-flat" style={{ marginTop: 8 }} onSubmit={comment}>
-                <label htmlFor={`ac-${c.id}`}>Binh luan (hien ten admin, khong an danh)</label>
-                <textarea id={`ac-${c.id}`} rows={2} value={draft} onChange={(e) => setDraft(e.target.value)} maxLength={5000} />
+                <label htmlFor={`ac-${c.id}`}>Bình luận (hiện tên admin, không ẩn danh)</label>
+                <MentionTextarea id={`ac-${c.id}`} rows={2} value={draft} onChange={(e) => setDraft(e.target.value)} maxLength={5000} />
                 <div className="row" style={{ marginTop: 8 }}>
-                  <button className="btn btn-primary" type="submit" disabled={!draft.trim()}>Gui</button>
+                  <button className="btn btn-primary" type="submit" disabled={!draft.trim()}>Gửi</button>
                 </div>
               </form>
             </>
@@ -99,18 +100,18 @@ export default function Admin() {
   useEffect(() => { load(); }, []);
 
   const tabs = [
-    ['overview', 'Tong quan'],
-    ['confessions', `Duyet bai (${pending?.length ?? 0})`],
-    ['approved', `Da duyet (${approved?.length ?? 0})`],
-    ['posts', `Bai viet (${posts?.length ?? 0})`],
-    ['reports', `Bao cao (${reports?.length ?? 0})`],
-    ['users', 'Nguoi dung'],
+    ['overview', 'Tổng quan'],
+    ['confessions', `Duyệt bài (${pending?.length ?? 0})`],
+    ['approved', `Đã duyệt (${approved?.length ?? 0})`],
+    ['posts', `Bài viết (${posts?.length ?? 0})`],
+    ['reports', `Báo cáo (${reports?.length ?? 0})`],
+    ['users', 'Người dùng'],
   ];
 
   return (
     <div className="wrap page">
-      <h1>Quan tri</h1>
-      <p className="muted">Duyet confession, xoa bai vi pham, xu ly bao cao va quan ly nguoi dung. Moi tac dong duoc ghi log.</p>
+      <h1>Quản trị</h1>
+      <p className="muted">Duyệt confession, xoa bai vi phạm, xử lý báo cáo và quản lý nguoi dung. Mọi tác động được ghi log.</p>
       {failed && <p className="field-err">{failed}</p>}
 
       <div className="tabs" role="tablist" aria-label="Khu vuc quan tri">
@@ -124,17 +125,17 @@ export default function Admin() {
       {tab === 'overview' && (
         stats ? (
           <div className="grid-2" style={{ gridTemplateColumns: '1fr 1fr' }}>
-            <div className="card"><strong style={{ fontSize: 28 }}>{stats.users}</strong><div className="muted">Nguoi dung</div></div>
-            <div className="card"><strong style={{ fontSize: 28 }}>{stats.posts}</strong><div className="muted">Bai viet</div></div>
-            <div className="card"><strong style={{ fontSize: 28 }}>{stats.pendingConfessions}</strong><div className="muted">Cho duyet</div></div>
-            <div className="card"><strong style={{ fontSize: 28 }}>{stats.openReports}</strong><div className="muted">Bao cao mo</div></div>
+            <div className="card"><strong style={{ fontSize: 28 }}>{stats.users}</strong><div className="muted">Người dùng</div></div>
+            <div className="card"><strong style={{ fontSize: 28 }}>{stats.posts}</strong><div className="muted">Bài viết</div></div>
+            <div className="card"><strong style={{ fontSize: 28 }}>{stats.pendingConfessions}</strong><div className="muted">Chờ duyệt</div></div>
+            <div className="card"><strong style={{ fontSize: 28 }}>{stats.openReports}</strong><div className="muted">Báo cáo mo</div></div>
           </div>
         ) : <SkeletonList rows={2} />
       )}
 
       {tab === 'confessions' && (
         pending === null ? <SkeletonList rows={3} /> : pending.length === 0 ? (
-          <EmptyState title="Khong con bai cho duyet" hint="Hang doi dang sach. Bai moi se hien o day." />
+          <EmptyState title="Không còn bài cho duyet" hint="Hàng đợi đang trống. Bài mới se hiện ở đây." />
         ) : (
           <div className="list">
             {pending.map((c) => (
@@ -146,15 +147,15 @@ export default function Admin() {
                     await api.post(`/api/admin/confessions/${c.id}/approve`, {});
                     load();
                   }}>
-                    <Check size={16} weight="regular" />Duyet
+                    <Check size={16} weight="regular" />Duyệt
                   </button>
                   <button className="btn btn-ghost" onClick={async () => {
-                    const reason = window.prompt('Ly do tu choi:', 'Noi dung khong phu hop');
+                    const reason = window.prompt('Lý do tu choi:', 'Nội dung không phù hợp');
                     if (reason === null) return;
                     await api.post(`/api/admin/confessions/${c.id}/reject`, { reason });
                     load();
                   }}>
-                    <X size={16} weight="regular" />Tu choi
+                    <X size={16} weight="regular" />Từ chối
                   </button>
                 </div>
               </div>
@@ -165,7 +166,7 @@ export default function Admin() {
 
       {tab === 'approved' && (
         approved === null ? <SkeletonList rows={3} /> : approved.length === 0 ? (
-          <EmptyState title="Chua co bai da duyet" hint="Bai duoc duyet se hien o day de tiep tuc kiem soat." />
+          <EmptyState title="Chưa có bai da duyet" hint="Bài được duyệt se hiện ở đây để tiếp tục kiem soat." />
         ) : (
           <div className="list">
             {approved.map((c) => (
@@ -177,7 +178,7 @@ export default function Admin() {
 
       {tab === 'posts' && (
         posts === null ? <SkeletonList rows={3} /> : posts.length === 0 ? (
-          <EmptyState title="Chua co bai viet" hint="Bai viet cua nguoi dung se hien o day." />
+          <EmptyState title="Chưa có bai viet" hint="Bài viết của nguoi dung se hiện ở đây." />
         ) : (
           <div className="list">
             {posts.map((p) => (
@@ -186,16 +187,16 @@ export default function Admin() {
                   <Avatar name={p.author_name} />
                   <div>
                     <Link to={`/posts/${p.id}`} className="post-title">{p.title}</Link>
-                    <div className="meta"><span>{p.author_name}</span><span>{timeAgo(p.created_at)}</span><span>{p.views} luot xem</span></div>
+                    <div className="meta"><span>{p.author_name}</span><span>{timeAgo(p.created_at)}</span><span>{p.views} lượt xem</span></div>
                   </div>
                 </div>
                 <div className="row" style={{ marginTop: 10 }}>
                   <button className="btn btn-ghost" style={{ padding: '6px 14px', fontSize: 13 }} onClick={async () => {
-                    if (!window.confirm(`Xoa bai "${p.title}"?`)) return;
+                    if (!window.confirm(`Xóa bài "${p.title}"?`)) return;
                     await api.post(`/api/admin/posts/${p.id}/delete`, {});
                     load();
                   }}>
-                    <Trash size={15} weight="regular" />Xoa bai
+                    <Trash size={15} weight="regular" />Xóa bài
                   </button>
                 </div>
               </div>
@@ -206,16 +207,16 @@ export default function Admin() {
 
       {tab === 'reports' && (
         reports === null ? <SkeletonList rows={3} /> : reports.length === 0 ? (
-          <EmptyState title="Khong co bao cao mo" hint="Bao cao tu cong dong se hien o day." />
+          <EmptyState title="Không có báo cáo mo" hint="Báo cáo tu cộng đồng se hiện ở đây." />
         ) : (
           <div className="list">
             {reports.map((r) => (
               <div key={r.id} className="card card-flat">
-                <div><strong>{r.target_type} #{r.target_id}</strong> Ly do: {r.reason}</div>
+                <div><strong>{r.target_type} #{r.target_id}</strong> Lý do: {r.reason}</div>
                 {r.description && <p className="muted">{r.description}</p>}
                 <div className="row" style={{ marginTop: 8 }}>
-                  <button className="btn btn-primary" onClick={async () => { await api.post(`/api/admin/reports/${r.id}/resolve`, { resolution: 'resolved' }); load(); }}>Danh dau da xu ly</button>
-                  <button className="btn btn-ghost" onClick={async () => { await api.post(`/api/admin/reports/${r.id}/resolve`, { resolution: 'dismissed' }); load(); }}>Bo qua</button>
+                  <button className="btn btn-primary" onClick={async () => { await api.post(`/api/admin/reports/${r.id}/resolve`, { resolution: 'resolved' }); load(); }}>Đánh dấu đã xử lý</button>
+                  <button className="btn btn-ghost" onClick={async () => { await api.post(`/api/admin/reports/${r.id}/resolve`, { resolution: 'dismissed' }); load(); }}>Bỏ qua</button>
                 </div>
               </div>
             ))}
@@ -228,9 +229,9 @@ export default function Admin() {
           <div className="row">
             <span style={{ position: 'relative', flex: '1 1 240px', maxWidth: 360 }}>
               <MagnifyingGlass size={17} weight="regular" style={{ position: 'absolute', left: 12, top: 12 }} />
-              <input aria-label="Tim nguoi dung" placeholder="Tim theo email hoac ten" value={search} onChange={(e) => setSearch(e.target.value)} style={{ paddingLeft: 36 }} />
+              <input aria-label="Tìm người dùng" placeholder="Tìm theo email hoac ten" value={search} onChange={(e) => setSearch(e.target.value)} style={{ paddingLeft: 36 }} />
             </span>
-            <button className="btn btn-ghost" onClick={loadUsers}>Tim</button>
+            <button className="btn btn-ghost" onClick={loadUsers}>Tìm</button>
           </div>
           {users === null ? <SkeletonList rows={3} /> : (
             <div className="list" style={{ marginTop: 14 }}>
@@ -241,11 +242,11 @@ export default function Admin() {
                     <div><strong>{u.display_name}</strong><div className="meta"><span>{u.email}</span><span>{u.role}</span><span>{u.status}</span></div></div>
                   </div>
                   <div className="row" style={{ marginTop: 10 }}>
-                    <button className="btn btn-ghost" onClick={async () => { await api.post(`/api/admin/users/${u.id}/${u.status === 'banned' ? 'unban' : 'ban'}`, {}); loadUsers(); }}>
-                      {u.status === 'banned' ? 'Mo khoa' : 'Khoa'}
+                    <button className="btn btn-ghost" onClick={async () => { await api.post(`/api/admin/users/${u.id}/${u.status === 'bạnned' ? 'unbạn' : 'bạn'}`, {}); loadUsers(); }}>
+                      {u.status === 'bạnned' ? 'Mở khóa' : 'Khoa'}
                     </button>
                     <button className="btn btn-ghost" onClick={async () => { await api.post(`/api/admin/users/${u.id}/role`, { role: u.role === 'admin' ? 'user' : 'admin' }); loadUsers(); }}>
-                      {u.role === 'admin' ? 'Ha quyen user' : 'Len admin'}
+                      {u.role === 'admin' ? 'Hạ quyền user' : 'Lên admin'}
                     </button>
                   </div>
                 </div>

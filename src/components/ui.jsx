@@ -7,7 +7,7 @@ export function Avatar({ name }) {
 
 export function SkeletonList({ rows = 3 }) {
   return (
-    <div className="list" aria-label="Dang tai">
+    <div className="list" aria-label="Đang tải">
       {Array.from({ length: rows }).map((_, i) => (
         <div key={i} className="card card-flat">
           <div className="skel" style={{ width: '55%', height: 18 }} />

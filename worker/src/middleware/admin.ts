@@ -2,8 +2,8 @@ import type { AuthUser } from '../types/index.js';
 import { json } from '../utils/response.js';
 
 export function requireAdmin(user: AuthUser | null): Response | null {
-  if (!user) return json({ error: 'Unauthorized' }, 401);
-  if (user.role !== 'admin') return json({ error: 'Forbidden' }, 403);
+  if (!user) return json({ error: 'Bạn chưa đăng nhập' }, 401);
+  if (user.role !== 'admin') return json({ error: 'Bạn không có quyền' }, 403);
   return null;
 }
 

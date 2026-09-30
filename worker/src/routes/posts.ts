@@ -33,18 +33,18 @@ export async function handlePosts(req: Request, env: Env, url: URL): Promise<Res
   // POST /api/posts {title,content,category_id?}
   if (path === '/api/posts' && req.method === 'POST') {
     const user = await getSessionUser(req, env);
-    if (!user) return err('Unauthorized', 401);
+    if (!user) return err('Bạn chưa đăng nhập', 401);
     const rl = rateLimit(req, 'post', 10, 600);
     if (rl) return rl;
     let body: any;
     try {
       body = await req.json();
     } catch {
-      return err('Invalid JSON', 400);
+      return err('Dữ liệu không hợp lệ', 400);
     }
     const title = str(body.title, 200);
     const content = str(body.content, 50000);
-    if (!title || !content) return err('title/content required', 400);
+    if (!title || !content) return err('Tiêu đề và nội dung là bắt buộc', 400);
     const categoryId = body.category_id ?? body.categoryId ?? null;
     const now = Math.floor(Date.now() / 1000);
     const r = await env.DB.prepare(
@@ -67,9 +67,9 @@ export async function handlePosts(req: Request, env: Env, url: URL): Promise<Res
       .first<any>();
     if (!row || row.status !== 'published') {
       // authors/admins may still view hidden via admin API
-      if (!row) return err('Not found', 404);
+      if (!row) return err('Không tìm thấy', 404);
       const user = await getSessionUser(req, env);
-      if (!user || (user.id !== row.author_id && user.role !== 'admin')) return err('Not found', 404);
+      if (!user || (user.id !== row.author_id && user.role !== 'admin')) return err('Không tìm thấy', 404);
     }
     if (row.status === 'published') {
       await env.DB.prepare(`UPDATE posts SET views = views + 1 WHERE id = ?`).bind(id).run();
@@ -86,11 +86,11 @@ export async function handlePosts(req: Request, env: Env, url: URL): Promise<Res
   // DELETE /api/posts/:id (owner or admin)
   if (m && req.method === 'DELETE') {
     const user = await getSessionUser(req, env);
-    if (!user) return err('Unauthorized', 401);
+    if (!user) return err('Bạn chưa đăng nhập', 401);
     const id = Number(m[1]);
     const row = await env.DB.prepare(`SELECT * FROM posts WHERE id = ?`).bind(id).first<any>();
-    if (!row) return err('Not found', 404);
-    if (row.author_id !== user.id && user.role !== 'admin') return err('Forbidden', 403);
+    if (!row) return err('Không tìm thấy', 404);
+    if (row.author_id !== user.id && user.role !== 'admin') return err('Bạn không có quyền', 403);
     await env.DB.prepare(`UPDATE posts SET status = 'deleted' WHERE id = ?`).bind(id).run();
     return json({ ok: true });
   }

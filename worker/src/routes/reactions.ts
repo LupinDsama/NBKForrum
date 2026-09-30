@@ -16,7 +16,7 @@ export async function handleReactions(req: Request, env: Env, url: URL): Promise
     const t = url.searchParams.get('target_type') ?? '';
     const id = Number(url.searchParams.get('target_id'));
     if (!TARGETS.includes(t as (typeof TARGETS)[number]) || !Number.isInteger(id)) {
-      return err('target_type + numeric target_id required', 400);
+      return err('Thiếu loại hoặc id', 400);
     }
     const rows = await env.DB.prepare(
       `SELECT kind, COUNT(*) AS n FROM reactions WHERE target_type = ? AND target_id = ? GROUP BY kind`,
@@ -39,7 +39,7 @@ export async function handleReactions(req: Request, env: Env, url: URL): Promise
   }
 
   const user = await getSessionUser(req, env);
-  if (!user) return err('Unauthorized', 401);
+  if (!user) return err('Bạn chưa đăng nhập', 401);
 
   if (req.method === 'POST') {
     const body: any = await req.json().catch(() => null);
@@ -47,7 +47,7 @@ export async function handleReactions(req: Request, env: Env, url: URL): Promise
     const id = body?.target_id;
     const kind = body?.kind;
     if (!TARGETS.includes(t) || !Number.isInteger(id) || !KINDS.includes(kind)) {
-      return err('target_type, numeric target_id, kind (like|haha|angry) required', 400);
+      return err('Thiếu loại, id hoặc cảm xúc', 400);
     }
     const now = Math.floor(Date.now() / 1000);
     await env.DB.prepare(
@@ -64,7 +64,7 @@ export async function handleReactions(req: Request, env: Env, url: URL): Promise
     const t = url.searchParams.get('target_type') ?? '';
     const id = Number(url.searchParams.get('target_id'));
     if (!TARGETS.includes(t as (typeof TARGETS)[number]) || !Number.isInteger(id)) {
-      return err('target_type + numeric target_id required', 400);
+      return err('Thiếu loại hoặc id', 400);
     }
     await env.DB.prepare(
       `DELETE FROM reactions WHERE user_id = ? AND target_type = ? AND target_id = ?`,
@@ -74,5 +74,5 @@ export async function handleReactions(req: Request, env: Env, url: URL): Promise
     return json({ ok: true });
   }
 
-  return err('Method not allowed', 405);
+  return err('Phương thức không được hỗ trợ', 405);
 }

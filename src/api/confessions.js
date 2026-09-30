@@ -9,25 +9,25 @@ export async function submitConfession(content) {
     headers: { 'content-type': 'application/json' },
     body: JSON.stringify({ content }),
   });
-  if (!res.ok) throw new Error((await res.json().catch(() => ({}))).error ?? 'Submit failed');
+  if (!res.ok) throw new Error((await res.json().catch(() => ({}))).error ?? 'Gửi thất bại, thử lại sau');
   return res.json();
 }
 
 export async function listConfessions(limit = 20, offset = 0) {
   const res = await fetch(apiUrl(`/api/confessions?limit=${limit}&offset=${offset}`), { credentials: 'include' });
-  if (!res.ok) throw new Error('Load failed');
+  if (!res.ok) throw new Error('Không tải được dữ liệu');
   return res.json();
 }
 
 // Admin:
 export async function listPendingConfessions() {
   const res = await fetch(apiUrl('/api/admin/confessions?status=pending'), { credentials: 'include' });
-  if (!res.ok) throw new Error('Forbidden');
+  if (!res.ok) throw new Error('Không có quyền');
   return res.json();
 }
 export async function approveConfession(id) {
   const res = await fetch(apiUrl(`/api/admin/confessions/${id}/approve`), { method: 'POST', credentials: 'include' });
-  if (!res.ok) throw new Error('Approve failed');
+  if (!res.ok) throw new Error('Duyệt thất bại');
 }
 export async function rejectConfession(id, reason) {
   const res = await fetch(apiUrl(`/api/admin/confessions/${id}/reject`), {
@@ -36,5 +36,5 @@ export async function rejectConfession(id, reason) {
     headers: { 'content-type': 'application/json' },
     body: JSON.stringify({ reason }),
   });
-  if (!res.ok) throw new Error('Reject failed');
+  if (!res.ok) throw new Error('Từ chối thất bại');
 }

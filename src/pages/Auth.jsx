@@ -21,20 +21,20 @@ export function Login() {
   const [busy, setBusy] = useState(false);
 
   return (
-    <Shell title="Dang nhap">
+    <Shell title="Đăng nhập">
       <form onSubmit={async (e) => {
         e.preventDefault(); setErr(''); setBusy(true);
         try { await login(email.trim(), password); nav('/'); }
         catch (ex) { setErr(ex.message); } finally { setBusy(false); }
       }}>
         <label htmlFor="le"><EnvelopeSimple size={15} weight="regular" style={{ verticalAlign: -2 }} /> Gmail</label>
-        <input id="le" type="email" value={email} onChange={(e) => setEmail(e.target.value)} autoComplete="email" placeholder="ban@gmail.com" />
-        <label htmlFor="lp"><Key size={15} weight="regular" style={{ verticalAlign: -2 }} /> Mat khau</label>
-        <input id="lp" type="password" value={password} onChange={(e) => setPassword(e.target.value)} autoComplete="current-password" placeholder="Toi thieu 8 ky tu" />
+        <input id="le" type="email" value={email} onChange={(e) => setEmail(e.target.value)} autoComplete="email" placeholder="bạn@gmail.com" />
+        <label htmlFor="lp"><Key size={15} weight="regular" style={{ verticalAlign: -2 }} /> Mật khẩu</label>
+        <input id="lp" type="password" value={password} onChange={(e) => setPassword(e.target.value)} autoComplete="current-password" placeholder="Tối thiểu 8 ký tự" />
         {err && <p className="field-err">{err}</p>}
         <div className="row" style={{ marginTop: 14 }}>
-          <button className="btn btn-primary" type="submit" disabled={busy || !email.trim() || !password}>{busy ? 'Dang nhap' : 'Dang nhap'}</button>
-          <Link to="/register">Chua co tai khoan</Link>
+          <button className="btn btn-primary" type="submit" disabled={busy || !email.trim() || !password}>{busy ? 'Đăng nhập' : 'Đăng nhập'}</button>
+          <Link to="/register">Chưa có tài khoản</Link>
         </div>
       </form>
     </Shell>
@@ -51,24 +51,24 @@ export function Register() {
   const [busy, setBusy] = useState(false);
 
   return (
-    <Shell title="Dang ky">
+    <Shell title="Đăng ký">
       <form onSubmit={async (e) => {
         e.preventDefault(); setErr(''); setBusy(true);
         try { await register(email.trim(), password, displayName.trim()); nav('/'); }
         catch (ex) { setErr(ex.message); } finally { setBusy(false); }
       }}>
         <label htmlFor="re"><EnvelopeSimple size={15} weight="regular" style={{ verticalAlign: -2 }} /> Gmail</label>
-        <input id="re" type="email" value={email} onChange={(e) => setEmail(e.target.value)} autoComplete="email" placeholder="ban@gmail.com" />
-        <p className="helper">Dung Gmail that de nhan thong bao kiem duyet.</p>
-        <label htmlFor="rn"><User size={15} weight="regular" style={{ verticalAlign: -2 }} /> Ten hien thi</label>
-        <input id="rn" value={displayName} onChange={(e) => setDisplayName(e.target.value)} maxLength={50} placeholder="Vi du: Minh Anh" />
-        <label htmlFor="rp"><Key size={15} weight="regular" style={{ verticalAlign: -2 }} /> Mat khau</label>
-        <input id="rp" type="password" value={password} onChange={(e) => setPassword(e.target.value)} autoComplete="new-password" placeholder="Toi thieu 8 ky tu" />
-        <p className="helper">Mat khau duoc hash tren server, khong luu dang text.</p>
+        <input id="re" type="email" value={email} onChange={(e) => setEmail(e.target.value)} autoComplete="email" placeholder="bạn@gmail.com" />
+        <p className="helper">Dùng Gmail that để nhận thông báo kiểm duyệt.</p>
+        <label htmlFor="rn"><User size={15} weight="regular" style={{ verticalAlign: -2 }} /> Tên hiển thị</label>
+        <input id="rn" value={displayName} onChange={(e) => setDisplayName(e.target.value)} maxLength={50} placeholder="Ví dụ: Minh Anh" />
+        <label htmlFor="rp"><Key size={15} weight="regular" style={{ verticalAlign: -2 }} /> Mật khẩu</label>
+        <input id="rp" type="password" value={password} onChange={(e) => setPassword(e.target.value)} autoComplete="new-password" placeholder="Tối thiểu 8 ký tự" />
+        <p className="helper">Mật khẩu được hash tren server, không lưu dang text.</p>
         {err && <p className="field-err">{err}</p>}
         <div className="row" style={{ marginTop: 14 }}>
-          <button className="btn btn-primary" type="submit" disabled={busy || !email.trim() || password.length < 8 || !displayName.trim()}>Tao tai khoan</button>
-          <Link to="/login">Da co tai khoan</Link>
+          <button className="btn btn-primary" type="submit" disabled={busy || !email.trim() || password.length < 8 || !displayName.trim()}>Tạo tài khoản</button>
+          <Link to="/login">Đã có tài khoản</Link>
         </div>
       </form>
     </Shell>

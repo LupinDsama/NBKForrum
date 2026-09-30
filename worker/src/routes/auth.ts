@@ -16,17 +16,17 @@ export async function handleAuth(req: Request, env: Env, url: URL): Promise<Resp
     try {
       body = await req.json();
     } catch {
-      return err('Invalid JSON', 400);
+      return err('Dữ liệu không hợp lệ', 400);
     }
     const email = typeof body.email === 'string' ? body.email.trim().toLowerCase() : '';
     const displayName = str(body.displayName ?? body.display_name, 50);
     const password = typeof body.password === 'string' ? body.password : '';
-    if (!isEmail(email)) return err('Invalid email', 400);
-    if (!displayName) return err('Invalid displayName (1-50 chars)', 400);
-    if (password.length < 8 || password.length > 128) return err('Password must be 8-128 chars', 400);
+    if (!isEmail(email)) return err('Email không hợp lệ', 400);
+    if (!displayName) return err('Tên hiển thị 1-50 ký tự', 400);
+    if (password.length < 8 || password.length > 128) return err('Mật khẩu 8-128 ký tự', 400);
 
     const exists = await env.DB.prepare(`SELECT id FROM users WHERE email = ?`).bind(email).first();
-    if (exists) return err('Email already registered', 409);
+    if (exists) return err('Email đã được đăng ký', 409);
 
     const now = Math.floor(Date.now() / 1000);
     const passwordHash = await hashPassword(password);
@@ -56,15 +56,15 @@ export async function handleAuth(req: Request, env: Env, url: URL): Promise<Resp
     try {
       body = await req.json();
     } catch {
-      return err('Invalid JSON', 400);
+      return err('Dữ liệu không hợp lệ', 400);
     }
     const email = typeof body.email === 'string' ? body.email.trim().toLowerCase() : '';
     const password = typeof body.password === 'string' ? body.password : '';
-    if (!isEmail(email) || !password) return err('Invalid credentials', 400);
+    if (!isEmail(email) || !password) return err('Email hoặc mật khẩu chưa đúng', 400);
     const user = await env.DB.prepare(`SELECT * FROM users WHERE email = ?`).bind(email).first<any>();
-    if (!user) return err('Invalid credentials', 401);
-    if (user.status !== 'active') return err('Account is ' + user.status, 403);
-    if (!(await verifyPassword(password, user.password_hash))) return err('Invalid credentials', 401);
+    if (!user) return err('Email hoặc mật khẩu chưa đúng', 401);
+    if (user.status !== 'active') return err('Tài khoản không còn hoạt động', 403);
+    if (!(await verifyPassword(password, user.password_hash))) return err('Email hoặc mật khẩu chưa đúng', 401);
 
     const now = Math.floor(Date.now() / 1000);
     const token = newSessionToken();
@@ -94,7 +94,7 @@ export async function handleAuth(req: Request, env: Env, url: URL): Promise<Resp
   // GET /api/auth/me
   if (path === '/api/auth/me' && req.method === 'GET') {
     const user = await getSessionUser(req, env);
-    if (!user) return err('Unauthorized', 401);
+    if (!user) return err('Bạn chưa đăng nhập', 401);
     return json({ id: user.id, email: user.email, displayName: user.display_name, role: user.role });
   }
 

@@ -30,7 +30,7 @@ export async function handleConfessions(req: Request, env: Env, url: URL): Promi
     const user = await getSessionUser(req, env);
     const body: any = await req.json().catch(() => null);
     const content = str(body?.content, 5000);
-    if (!content) return err('content required (1-5000 chars)', 400);
+    if (!content) return err('Nội dung từ 1 đến 5000 ký tự', 400);
     const now = Math.floor(Date.now() / 1000);
     const r = await env.DB.prepare(
       `INSERT INTO confessions (author_id, content, status, created_at) VALUES (?, ?, 'pending', ?)`,
@@ -43,7 +43,7 @@ export async function handleConfessions(req: Request, env: Env, url: URL): Promi
   // GET /api/confessions/mine (own submissions with status)
   if (path === '/api/confessions/mine' && req.method === 'GET') {
     const user = await getSessionUser(req, env);
-    if (!user) return err('Unauthorized', 401);
+    if (!user) return err('Bạn chưa đăng nhập', 401);
     const rows = await env.DB.prepare(`SELECT * FROM confessions WHERE author_id = ? ORDER BY created_at DESC LIMIT 50`)
       .bind(user.id)
       .all();
@@ -58,7 +58,7 @@ export async function handleConfessions(req: Request, env: Env, url: URL): Promi
     )
       .bind(Number(one[1]))
       .first<any>();
-    if (!row) return err('Not found', 404);
+    if (!row) return err('Không tìm thấy', 404);
     const comments = await env.DB.prepare(
       `SELECT c.*, u.display_name AS author_name FROM comments c JOIN users u ON u.id = c.author_id
        WHERE c.target_type = 'confession' AND c.target_id = ? ORDER BY c.created_at ASC LIMIT 200`,
