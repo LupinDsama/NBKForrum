@@ -4,6 +4,7 @@ import { handleAuth } from './routes/auth.js';
 import { handlePosts } from './routes/posts.js';
 import { handleForum } from './routes/forum.js';
 import { handleConfessions } from './routes/confessions.js';
+import { handleReactions } from './routes/reactions.js';
 import { handleAdmin } from './routes/admin.js';
 
 function cors(req: Request, env: Env): HeadersInit {
@@ -34,7 +35,7 @@ export default {
       return json({ ok: true, message: 'Forum API is working' });
     }
 
-    const handlers = [handleAuth, handleAdmin, handlePosts, handleForum, handleConfessions];
+    const handlers = [handleAuth, handleAdmin, handlePosts, handleForum, handleConfessions, handleReactions];
     for (const h of handlers) {
       const res = await h(request, env, url);
       if (res) {

@@ -58,7 +58,19 @@ export async function handleForum(req: Request, env: Env, url: URL): Promise<Res
     )
       .bind(id)
       .all();
-    return json({ question: q, answers: answers.results });
+    const answerIds = (answers.results as any[]).map((a) => a.id);
+    let answerComments: unknown[] = [];
+    if (answerIds.length > 0) {
+      const placeholders = answerIds.map(() => '?').join(',');
+      const cc = await env.DB.prepare(
+        `SELECT c.*, u.display_name AS author_name FROM comments c JOIN users u ON u.id = c.author_id
+         WHERE c.target_type = 'answer' AND c.target_id IN (${placeholders}) ORDER BY c.created_at ASC LIMIT 500`,
+      )
+        .bind(...answerIds)
+        .all();
+      answerComments = cc.results;
+    }
+    return json({ question: q, answers: answers.results, answerComments });
   }
 
   // POST /api/questions/:id/answers {content}
@@ -97,21 +109,33 @@ export async function handleForum(req: Request, env: Env, url: URL): Promise<Res
     return json({ ok: true });
   }
 
-  // POST /api/comments {target_type, target_id, content}
+  // POST /api/comments {target_type, target_id, content, parent_id?}
+  // parent_id = reply to another comment on the same target. Mentions (@name) are plain text.
   if (path === '/api/comments' && req.method === 'POST') {
     const user = await getSessionUser(req, env);
     if (!user) return err('Unauthorized', 401);
     const body: any = await req.json().catch(() => null);
     const content = str(body?.content, 5000);
-    if (!content || !['post', 'question', 'answer'].includes(body?.target_type) || !Number.isInteger(body?.target_id)) {
-      return err('target_type (post|question|answer), target_id, content required', 400);
+    if (!content || !['post', 'question', 'answer', 'confession'].includes(body?.target_type) || !Number.isInteger(body?.target_id)) {
+      return err('target_type (post|question|answer|confession), target_id, content required', 400);
+    }
+    let parentId: number | null = null;
+    if (body?.parent_id != null) {
+      if (!Number.isInteger(body.parent_id)) return err('parent_id must be numeric', 400);
+      const parent = await env.DB.prepare(
+        `SELECT id FROM comments WHERE id = ? AND target_type = ? AND target_id = ?`,
+      )
+        .bind(body.parent_id, body.target_type, body.target_id)
+        .first();
+      if (!parent) return err('Parent comment not found on this target', 404);
+      parentId = body.parent_id;
     }
     const now = Math.floor(Date.now() / 1000);
     const r = await env.DB.prepare(
-      `INSERT INTO comments (author_id, target_type, target_id, content, created_at, updated_at)
-       VALUES (?, ?, ?, ?, ?, ?)`,
+      `INSERT INTO comments (author_id, target_type, target_id, parent_id, content, created_at, updated_at)
+       VALUES (?, ?, ?, ?, ?, ?, ?)`,
     )
-      .bind(user.id, body.target_type, body.target_id, content, now, now)
+      .bind(user.id, body.target_type, body.target_id, parentId, content, now, now)
       .run();
     return json({ id: Number(r.meta.last_row_id) }, 201);
   }

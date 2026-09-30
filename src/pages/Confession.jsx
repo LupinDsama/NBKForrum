@@ -1,9 +1,11 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { PaperPlaneTilt, Bell } from '@phosphor-icons/react';
+import { PaperPlaneTilt, Bell, ChatCircle } from '@phosphor-icons/react';
 import { useAuth } from '../context/AuthContext.jsx';
 import { api, timeAgo } from '../api/client.js';
 import { Avatar, SkeletonList, EmptyState } from '../components/ui.jsx';
+import CommentThread from '../components/Comments.jsx';
+import Reactions from '../components/Reactions.jsx';
 
 const MAX = 5000;
 
@@ -11,6 +13,47 @@ function StatusBadge({ status }) {
   if (status === 'approved') return <span className="badge badge-accent">Da duyet</span>;
   if (status === 'rejected') return <span className="badge">Bi tu choi</span>;
   return <span className="badge">Cho duyet</span>;
+}
+
+function ConfessionCard({ c, showComments }) {
+  const [open, setOpen] = useState(false);
+  const [detail, setDetail] = useState(null);
+
+  async function toggle() {
+    if (open) { setOpen(false); return; }
+    setOpen(true);
+    if (!detail) {
+      try { setDetail(await api.get(`/api/confessions/${c.id}`)); }
+      catch { setDetail({ comments: [] }); }
+    }
+  }
+
+  return (
+    <article className="card card-flat">
+      <div className="meta"><Avatar name="A" /><span>An danh</span><span>{timeAgo(c.published_at || c.created_at)}</span></div>
+      <p>{c.content}</p>
+      <div className="row">
+        <Reactions targetType="confession" targetId={c.id} />
+        {showComments && (
+          <button className="btn btn-ghost" style={{ padding: '6px 14px', fontSize: 13 }} onClick={toggle}>
+            <ChatCircle size={15} weight="regular" />Binh luan{c.comment_count ? ` (${c.comment_count})` : ''}
+          </button>
+        )}
+      </div>
+      {showComments && open && (
+        <div style={{ marginTop: 12 }}>
+          {!detail ? <SkeletonList rows={2} /> : (
+            <>
+              <p className="helper">Binh luan hien ten that, khong an danh.</p>
+              <CommentThread targetType="confession" targetId={c.id} comments={detail.comments || []} onChanged={async () => {
+                setDetail(await api.get(`/api/confessions/${c.id}`).catch(() => detail));
+              }} />
+            </>
+          )}
+        </div>
+      )}
+    </article>
+  );
 }
 
 export default function Confession() {
@@ -123,10 +166,7 @@ export default function Confession() {
       {items !== null && items.length > 0 && (
         <div className="list">
           {items.map((c) => (
-            <article key={c.id} className="card card-flat">
-              <div className="meta"><Avatar name="A" /><span>An danh</span><span>{timeAgo(c.published_at || c.created_at)}</span></div>
-              <p style={{ marginBottom: 0 }}>{c.content}</p>
-            </article>
+            <ConfessionCard key={c.id} c={c} showComments />
           ))}
         </div>
       )}

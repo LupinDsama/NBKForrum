@@ -145,5 +145,41 @@ export async function handleAdmin(req: Request, env: Env, url: URL): Promise<Res
     return json({ ok: true });
   }
 
+  // GET /api/admin/posts -> all posts incl. hidden, newest first
+  if (path === '/api/admin/posts' && req.method === 'GET') {
+    const rows = await env.DB.prepare(
+      `SELECT p.*, u.display_name AS author_name FROM posts p JOIN users u ON u.id = p.author_id
+       WHERE p.status != 'deleted' ORDER BY p.created_at DESC LIMIT 100`,
+    ).all();
+    return json({ items: rows.results });
+  }
+
+  // POST /api/admin/posts/:id/delete (soft delete)
+  const delPost = path.match(/^\/api\/admin\/posts\/(\d+)\/delete$/);
+  if (delPost && req.method === 'POST') {
+    const id = Number(delPost[1]);
+    const r = await env.DB.prepare(`UPDATE posts SET status = 'deleted' WHERE id = ? AND status != 'deleted'`)
+      .bind(id)
+      .run();
+    if (r.meta.changes === 0) return err('Not found', 404);
+    await logAdmin(env.DB, admin.id, 'delete_post', 'post', id);
+    return json({ ok: true });
+  }
+
+  // POST /api/admin/confessions/:id/delete (hard delete + cleanup reactions/comments)
+  const delConf = path.match(/^\/api\/admin\/confessions\/(\d+)\/delete$/);
+  if (delConf && req.method === 'POST') {
+    const id = Number(delConf[1]);
+    const exists = await env.DB.prepare(`SELECT id FROM confessions WHERE id = ?`).bind(id).first();
+    if (!exists) return err('Not found', 404);
+    await env.DB.batch([
+      env.DB.prepare(`DELETE FROM reactions WHERE target_type = 'confession' AND target_id = ?`).bind(id),
+      env.DB.prepare(`DELETE FROM comments WHERE target_type = 'confession' AND target_id = ?`).bind(id),
+      env.DB.prepare(`DELETE FROM confessions WHERE id = ?`).bind(id),
+    ]);
+    await logAdmin(env.DB, admin.id, 'delete_confession', 'confession', id);
+    return json({ ok: true });
+  }
+
   return err('Admin route not found', 404);
 }

@@ -26,6 +26,12 @@ export default function Navbar({ theme, onTheme }) {
         >
           <List size={20} weight="regular" />
         </button>
+        {!user && (
+          <span className="mobile-auth">
+            <Link to="/login" onClick={() => setOpen(false)}>Dang nhap</Link>
+            <Link to="/register" className="btn btn-primary" style={{ padding: '7px 16px', fontSize: 13.5 }} onClick={() => setOpen(false)}>Dang ky</Link>
+          </span>
+        )}
         <nav className={`nav-links${open ? ' open' : ''}`} aria-label="Dieu huong chinh">
           <NavLink to="/forum" onClick={() => setOpen(false)}>Forum</NavLink>
           <NavLink to="/confession" onClick={() => setOpen(false)}>Confession</NavLink>

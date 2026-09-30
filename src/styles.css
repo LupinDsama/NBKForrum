@@ -63,6 +63,7 @@ a:hover { color: var(--accent-strong); }
 .nav-links a:hover { background: var(--surface-2); color: var(--text); }
 .nav-links a.active { background: var(--surface-2); color: var(--text); }
 .menu-btn { display: none; }
+.mobile-auth { display: none; }
 @media (max-width: 768px) {
   .nav-links { display: none; }
   .nav-links.open {
@@ -71,6 +72,8 @@ a:hover { color: var(--accent-strong); }
     background: var(--surface); border-bottom: 1px solid var(--line); padding: 10px 16px 14px;
   }
   .menu-btn { display: inline-flex; margin-left: auto; }
+  .mobile-auth { display: inline-flex; gap: 10px; align-items: center; margin-left: 12px; }
+  .mobile-auth a:not(.btn) { font-weight: 600; font-size: 14px; text-decoration: none; }
 }
 
 /* Buttons: one line labels, AA contrast, tactile press */
@@ -172,4 +175,22 @@ input::placeholder, textarea::placeholder { color: var(--muted); opacity: 0.85; 
 .post-title { font-size: 17px; font-weight: 700; text-decoration: none; }
 .post-title:hover { color: var(--accent-strong); }
 .clamp-3 { display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
+
+/* Reactions: one accent, pressed state filled */
+.reactions { display: inline-flex; gap: 6px; align-items: center; flex-wrap: wrap; }
+.react-btn {
+  display: inline-flex; align-items: center; gap: 6px;
+  border: 1px solid var(--line); background: var(--surface); color: var(--muted);
+  border-radius: 999px; padding: 5px 12px; font-size: 13.5px; font-weight: 650; cursor: pointer;
+}
+.react-btn:active { transform: translateY(1px) scale(0.98); }
+.react-btn[aria-pressed="true"] { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }
+.react-btn:disabled { cursor: default; }
+
+/* @mentions + threaded replies */
+.mention {
+  background: var(--surface-2); border: 1px solid var(--line);
+  border-radius: 6px; padding: 0 5px; font-weight: 650; font-size: 0.92em; white-space: nowrap;
+}
+.reply-indent { border-left: 2px solid var(--line); padding-left: 12px; margin-left: 6px; }
 @media (prefers-reduced-motion: reduce) { * { transition: none !important; animation: none !important; } }

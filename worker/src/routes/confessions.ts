@@ -13,8 +13,10 @@ export async function handleConfessions(req: Request, env: Env, url: URL): Promi
     const limit = Math.min(Number(url.searchParams.get('limit') ?? 20), 50);
     const offset = Number(url.searchParams.get('offset') ?? 0);
     const rows = await env.DB.prepare(
-      `SELECT id, content, created_at, published_at FROM confessions
-       WHERE status = 'approved' ORDER BY published_at DESC LIMIT ? OFFSET ?`,
+      `SELECT cf.id, cf.content, cf.created_at, cf.published_at,
+        (SELECT COUNT(*) FROM comments c WHERE c.target_type = 'confession' AND c.target_id = cf.id) AS comment_count
+       FROM confessions cf
+       WHERE cf.status = 'approved' ORDER BY cf.published_at DESC LIMIT ? OFFSET ?`,
     )
       .bind(limit, offset)
       .all();
@@ -46,6 +48,24 @@ export async function handleConfessions(req: Request, env: Env, url: URL): Promi
       .bind(user.id)
       .all();
     return json({ items: rows.results });
+  }
+
+  // GET /api/confessions/:id -> approved confession + comments (commenters NOT anonymous)
+  const one = path.match(/^\/api\/confessions\/(\d+)$/);
+  if (one && req.method === 'GET') {
+    const row = await env.DB.prepare(
+      `SELECT id, content, created_at, published_at FROM confessions WHERE id = ? AND status = 'approved'`,
+    )
+      .bind(Number(one[1]))
+      .first<any>();
+    if (!row) return err('Not found', 404);
+    const comments = await env.DB.prepare(
+      `SELECT c.*, u.display_name AS author_name FROM comments c JOIN users u ON u.id = c.author_id
+       WHERE c.target_type = 'confession' AND c.target_id = ? ORDER BY c.created_at ASC LIMIT 200`,
+    )
+      .bind(Number(one[1]))
+      .all();
+    return json({ confession: { ...row, author: 'Anonymous' }, comments: comments.results });
   }
 
   return null;
