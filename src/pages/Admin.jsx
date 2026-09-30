@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+﻿import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Check, X, MagnifyingGlass, Trash, ChatCircle } from '@phosphor-icons/react';
 import { api, timeAgo } from '../api/client.js';
@@ -242,8 +242,8 @@ export default function Admin() {
                     <div><strong>{u.display_name}</strong><div className="meta"><span>{u.email}</span><span>{u.role}</span><span>{u.status}</span></div></div>
                   </div>
                   <div className="row" style={{ marginTop: 10 }}>
-                    <button className="btn btn-ghost" onClick={async () => { await api.post(`/api/admin/users/${u.id}/${u.status === 'bạnned' ? 'unbạn' : 'bạn'}`, {}); loadUsers(); }}>
-                      {u.status === 'bạnned' ? 'Mở khóa' : 'Khoa'}
+                    <button className="btn btn-ghost" onClick={async () => { await api.post(`/api/admin/users/${u.id}/${u.status === 'banned' ? 'unban' : 'ban'}`, {}); loadUsers(); }}>
+                      {u.status === 'banned' ? 'Mở khóa' : 'Khóa'}
                     </button>
                     <button className="btn btn-ghost" onClick={async () => { await api.post(`/api/admin/users/${u.id}/role`, { role: u.role === 'admin' ? 'user' : 'admin' }); loadUsers(); }}>
                       {u.role === 'admin' ? 'Hạ quyền user' : 'Lên admin'}

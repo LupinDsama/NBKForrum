@@ -47,7 +47,7 @@ export function QuestionDetail() {
 
   async function load() {
     try { setData(await api.get(`/api/questions/${id}`)); }
-    catch { setFailed('Không tải được cau hoi.'); }
+    catch { setFailed('Không tải được câu hỏi.'); }
   }
   useEffect(() => { load(); }, [id]);
 

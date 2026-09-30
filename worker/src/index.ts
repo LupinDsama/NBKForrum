@@ -56,11 +56,11 @@ export default {
       if (!user || user.role !== 'admin') return json({ error: 'Bạn không có quyền' }, 403);
       const now = Math.floor(Date.now() / 1000);
       for (const [name, slug] of [
-        ['Programming', 'programming'],
-        ['Physics', 'physics'],
-        ['Mathematics', 'mathematics'],
+        ['Lập trình', 'programming'],
+        ['Vật lý', 'physics'],
+        ['Toán học', 'mathematics'],
         ['Gaming', 'gaming'],
-        ['General', 'general'],
+        ['Chung', 'general'],
       ] as const) {
         await env.DB.prepare(`INSERT OR IGNORE INTO categories (name, slug, created_at) VALUES (?, ?, ?)`)
           .bind(name, slug, now)

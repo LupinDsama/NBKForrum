@@ -64,7 +64,7 @@ export function Register() {
         <input id="rn" value={displayName} onChange={(e) => setDisplayName(e.target.value)} maxLength={50} placeholder="Ví dụ: Minh Anh" />
         <label htmlFor="rp"><Key size={15} weight="regular" style={{ verticalAlign: -2 }} /> Mật khẩu</label>
         <input id="rp" type="password" value={password} onChange={(e) => setPassword(e.target.value)} autoComplete="new-password" placeholder="Tối thiểu 8 ký tự" />
-        <p className="helper">Mật khẩu được hash tren server, không lưu dang text.</p>
+        <p className="helper">Mật khẩu được hash trên server, không lưu dạng text.</p>
         {err && <p className="field-err">{err}</p>}
         <div className="row" style={{ marginTop: 14 }}>
           <button className="btn btn-primary" type="submit" disabled={busy || !email.trim() || password.length < 8 || !displayName.trim()}>Tạo tài khoản</button>

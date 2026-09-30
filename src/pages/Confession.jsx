@@ -95,7 +95,7 @@ export default function Confession() {
   async function submit(e) {
     e.preventDefault();
     setErr(''); setMsg('');
-    if (!content.trim()) { setErr('Vui lòng nhap nội dung.'); return; }
+    if (!content.trim()) { setErr('Vui lòng nhập nội dung.'); return; }
     setSending(true);
     try {
       const r = await api.post('/api/confessions', { content: content.trim() });
@@ -116,7 +116,7 @@ export default function Confession() {
           <p className="helper">{content.length}/{MAX} ký tự. Không đăng thông tin cá nhân.</p>
           {err && <p className="field-err">{err}</p>}
           {msg && <p className="notice" style={{ marginTop: 10 }}>{msg}</p>}
-          {!user && <p className="helper">Bạn có thể gui mà khong can dang nhap, nhung dang nhap thì mới theo doi được trạng thái bai của mình.</p>}
+          {!user && <p className="helper">Bạn có thể gui mà khong can đăng nhập, nhung đăng nhập thì mới theo doi được trạng thái bai của mình.</p>}
           <div className="row" style={{ marginTop: 12 }}>
             <button className="btn btn-primary" type="submit" disabled={sending || !content.trim()}>
               <PaperPlaneTilt size={17} weight="regular" />{sending ? 'Đang gửi' : 'Gửi confession'}
@@ -139,7 +139,7 @@ export default function Confession() {
             </div>
           )}
           {mine === null && <SkeletonList rows={2} />}
-          {mine !== null && mine.length === 0 && <EmptyState title="Bạn chưa gửi bai nào" hint="Bài bạn gửi khi dang nhap se hiện ở đây kem trạng thái." />}
+          {mine !== null && mine.length === 0 && <EmptyState title="Bạn chưa gửi bai nào" hint="Bài bạn gửi khi đăng nhập se hiện ở đây kem trạng thái." />}
           {mine !== null && mine.length > 0 && (
             <div className="list">
               {mine.map((c) => (
@@ -152,7 +152,7 @@ export default function Confession() {
                   {c.status === 'rejected' && c.rejection_reason && (
                     <p className="notice" style={{ marginTop: 8 }}>Lý do tu choi: {c.rejection_reason}</p>
                   )}
-                  {c.status === 'pending' && <p className="helper">Đang chờ admin xem. Bạn sẽ thấy thông báo khi co ket qua.</p>}
+                  {c.status === 'pending' && <p className="helper">Đang chờ admin xem. Bạn sẽ thấy thông báo khi co kết quả.</p>}
                 </article>
               ))}
             </div>
@@ -162,7 +162,7 @@ export default function Confession() {
 
       <h2 style={{ marginTop: 30 }}>Moi được duyet</h2>
       {items === null && <SkeletonList rows={3} />}
-      {items !== null && items.length === 0 && <EmptyState title="Chưa có confession" hint="Bài duyệt sẽ hiện o day. Bạn có thể gui bài đầu tiên." action={!user ? <Link to="/login" className="btn btn-ghost">Đăng nhập để theo dõi bài</Link> : null} />}
+      {items !== null && items.length === 0 && <EmptyState title="Chưa có confession" hint="Bài duyệt sẽ hiện ở đây. Bạn có thể gui bài đầu tiên." action={!user ? <Link to="/login" className="btn btn-ghost">Đăng nhập để theo dõi bài</Link> : null} />}
       {items !== null && items.length > 0 && (
         <div className="list">
           {items.map((c) => (

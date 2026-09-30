@@ -26,7 +26,7 @@ export default function Home() {
       if (!alive) return;
       setPosts(p.items || []);
       setConfessions(c.items || []);
-    }).catch(() => alive && setFailed('Không tải được du lieu. Vui lòng tai lai trang.'));
+    }).catch(() => alive && setFailed('Không tải được du lieu. Vui lòng tải lại trang.'));
     return () => { alive = false; };
   }, []);
 
@@ -96,7 +96,7 @@ export default function Home() {
           <h2><ShieldCheck size={20} weight="regular" style={{ verticalAlign: -3 }} /> Confession da duyet</h2>
           {confessions === null && !failed && <SkeletonList rows={2} />}
           {confessions !== null && confessions.length === 0 && (
-            <EmptyState title="Chưa có confession" hint="Bài gửi sẽ hiện o day sau khi admin phê duyệt." />
+            <EmptyState title="Chưa có confession" hint="Bài gửi sẽ hiện ở đây sau khi admin phê duyệt." />
           )}
           {confessions !== null && confessions.length > 0 && (
             <div className="list">

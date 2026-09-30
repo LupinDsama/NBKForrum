@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+﻿import { useEffect, useRef, useState } from 'react';
 import { api } from '../api/client.js';
 
 // Textarea with @mention autocomplete (user directory, Phosphor-free plain list).
@@ -27,8 +27,8 @@ export default function MentionTextarea({ value, onChange, id, ...rest }) {
 
   useEffect(() => {
     if (!open) return;
-    clearTìmeout(timer.current);
-    timer.current = setTìmeout(async () => {
+    clearTimeout(timer.current);
+    timer.current = setTimeout(async () => {
       try {
         const d = await api.get(`/api/users/search?q=${encodeURIComponent(q)}`);
         setItems(d.items || []);
@@ -36,7 +36,7 @@ export default function MentionTextarea({ value, onChange, id, ...rest }) {
         setItems([]);
       }
     }, 180);
-    return () => clearTìmeout(timer.current);
+    return () => clearTimeout(timer.current);
   }, [q, open]);
 
   function pick(name) {
@@ -67,7 +67,7 @@ export default function MentionTextarea({ value, onChange, id, ...rest }) {
 
   return (
     <span style={{ position: 'relative', display: 'block' }}>
-      <textarea id={id} value={value} onChange={handleChange} onKeyDown={onKey} onBlur={() => setTìmeout(() => setOpen(false), 150)} {...rest} />
+      <textarea id={id} value={value} onChange={handleChange} onKeyDown={onKey} onBlur={() => setTimeout(() => setOpen(false), 150)} {...rest} />
       {open && items.length > 0 && (
         <span className="mention-pop" role="listbox" aria-label="Gợi ý tên">
           {items.map((u, i) => (

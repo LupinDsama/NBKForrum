@@ -92,7 +92,7 @@ export default function Forum() {
               <label htmlFor="pt">Tiêu đề bai viet</label>
               <input id="pt" value={title} onChange={(e) => setTitle(e.target.value)} maxLength={200} placeholder="Ví dụ: Cách ôn thì Vật lý hiệu quả" />
               <label htmlFor="pc">Nội dung</label>
-              <textarea id="pc" rows={4} value={content} onChange={(e) => setContent(e.target.value)} placeholder="Mô tả chi tiet van để của bạn" />
+              <textarea id="pc" rows={4} value={content} onChange={(e) => setContent(e.target.value)} placeholder="Mô tả chi tiết van để của bạn" />
               <p className="helper">Tối đa 200 ký tự tiêu đề, nội dung văn minh.</p>
               {err && <p className="field-err">{err}</p>}
               <div className="row" style={{ marginTop: 12 }}>
@@ -139,7 +139,7 @@ export default function Forum() {
           )}
           <h2 style={{ marginTop: 26 }}>Câu hỏi mới</h2>
           {questions === null && <SkeletonList rows={4} />}
-          {questions !== null && questions.length === 0 && <EmptyState title="Chưa có cau hoi" hint="Đặt câu hỏi dau tien để cộng đồng giúp bạn." />}
+          {questions !== null && questions.length === 0 && <EmptyState title="Chưa có câu hỏi" hint="Đặt câu hỏi đầu tiên để cộng đồng giúp bạn." />}
           {questions !== null && questions.length > 0 && (
             <div className="list">
               {questions.map((item) => (
