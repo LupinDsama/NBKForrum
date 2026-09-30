@@ -64,6 +64,7 @@ a:hover { color: var(--accent-strong); }
 .nav-links a.active { background: var(--surface-2); color: var(--text); }
 .menu-btn { display: none; }
 .mobile-auth { display: none; }
+.mobile-bell { display: none; }
 @media (max-width: 768px) {
   .nav-links { display: none; }
   .nav-links.open {
@@ -72,6 +73,7 @@ a:hover { color: var(--accent-strong); }
     background: var(--surface); border-bottom: 1px solid var(--line); padding: 10px 16px 14px;
   }
   .menu-btn { display: inline-flex; margin-left: auto; }
+  .mobile-bell { display: inline-flex; margin-left: 12px; }
   .mobile-auth { display: inline-flex; gap: 10px; align-items: center; margin-left: 12px; }
   .mobile-auth a:not(.btn) { font-weight: 600; font-size: 14px; text-decoration: none; }
 }
@@ -202,5 +204,24 @@ input::placeholder, textarea::placeholder { color: var(--muted); opacity: 0.85; 
   border-radius: 8px; padding: 8px 10px; font-size: 14px; font-weight: 600; color: var(--text); cursor: pointer;
 }
 .mention-item.active, .mention-item:hover { background: var(--surface-2); }
+
+/* Notification bell + popup */
+.icon-btn { position: relative; }
+.notif-badge {
+  position: absolute; top: -4px; right: -4px; min-width: 18px; height: 18px;
+  border-radius: 999px; background: var(--accent); color: var(--accent-ink);
+  font-size: 11px; font-weight: 800; display: inline-flex; align-items: center; justify-content: center;
+  padding: 0 5px;
+}
+.notif-pop {
+  position: absolute; right: 0; top: calc(100% + 8px); z-index: 40;
+  width: min(360px, calc(100vw - 40px)); max-height: 420px; overflow-y: auto;
+  background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius-card);
+  box-shadow: var(--shadow); padding: 10px; display: grid; gap: 6px;
+}
+.notif-head { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 2px 4px 6px; }
+.notif-item { display: flex; gap: 8px; align-items: flex-start; border: 1px solid var(--line); border-radius: 10px; padding: 8px 10px; }
+.notif-item.unread { border-color: var(--accent); }
+.notif-item a { text-decoration: none; }
 .reply-indent { border-left: 2px solid var(--line); padding-left: 12px; margin-left: 6px; }
 @media (prefers-reduced-motion: reduce) { * { transition: none !important; animation: none !important; } }

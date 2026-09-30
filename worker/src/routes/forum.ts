@@ -154,6 +154,7 @@ export async function handleForum(req: Request, env: Env, url: URL): Promise<Res
     )
       .bind(user.id, body.target_type, body.target_id, parentId, content, now, now)
       .run();
+    await notifyMentioned(env.DB, content, user, body.target_type, body.target_id);
     return json({ id: Number(r.meta.last_row_id) }, 201);
   }
 
@@ -214,5 +215,72 @@ export async function handleForum(req: Request, env: Env, url: URL): Promise<Res
     return json({ items: rows.results });
   }
 
+  // POST /api/notifications/read-all (mark mine as read)
+  if (path === '/api/notifications/read-all' && req.method === 'POST') {
+    const user = await getSessionUser(req, env);
+    if (!user) return err('Bạn chưa đăng nhập', 401);
+    await env.DB.prepare(`UPDATE notifications SET is_read = 1 WHERE user_id = ? AND is_read = 0`)
+      .bind(user.id)
+      .run();
+    return json({ ok: true });
+  }
+
+  // DELETE /api/notifications (clear all mine)
+  if (path === '/api/notifications' && req.method === 'DELETE') {
+    const user = await getSessionUser(req, env);
+    if (!user) return err('Bạn chưa đăng nhập', 401);
+    await env.DB.prepare(`DELETE FROM notifications WHERE user_id = ?`).bind(user.id).run();
+    return json({ ok: true });
+  }
+
+  // DELETE /api/notifications/:id (own only)
+  const delNotif = path.match(/^\/api\/notifications\/(\d+)$/);
+  if (delNotif && req.method === 'DELETE') {
+    const user = await getSessionUser(req, env);
+    if (!user) return err('Bạn chưa đăng nhập', 401);
+    const r = await env.DB.prepare(`DELETE FROM notifications WHERE id = ? AND user_id = ?`)
+      .bind(Number(delNotif[1]), user.id)
+      .run();
+    if (r.meta.changes === 0) return err('Không tìm thấy', 404);
+    return json({ ok: true });
+  }
+
   return null;
+}
+
+// @mentions (@"Hoai nam" or @Minh) notify the named users, except the author.
+export async function notifyMentioned(
+  db: D1Database,
+  content: string,
+  author: { id: number; display_name: string },
+  targetType: string,
+  targetId: number,
+): Promise<void> {
+  const names = new Set<string>();
+  for (const m of content.matchAll(/@"([^"\n]{1,50})"/g)) {
+    const n = m[1].trim();
+    if (n) names.add(n);
+  }
+  for (const m of content.matchAll(/(?:^|\s)@([^\s@]{1,50})/g)) {
+    if (m[1]) names.add(m[1]);
+  }
+  if (names.size === 0) return;
+  const list = [...names];
+  const placeholders = list.map(() => '?').join(',');
+  const rows = await db.prepare(
+    `SELECT id, display_name FROM users WHERE status = 'active' AND display_name IN (${placeholders})`,
+  )
+    .bind(...list)
+    .all<{ id: number; display_name: string }>();
+  const now = Math.floor(Date.now() / 1000);
+  const snippet = content.length > 120 ? content.slice(0, 120) + '…' : content;
+  for (const u of rows.results) {
+    if (u.id === author.id) continue;
+    await db.prepare(
+      `INSERT INTO notifications (user_id, type, title, message, target_type, target_id, is_read, created_at)
+       VALUES (?, 'mention', ?, ?, ?, ?, 0, ?)`,
+    )
+      .bind(u.id, `${author.display_name} đã nhắc đến bạn`, snippet, targetType, targetId, now)
+      .run();
+  }
 }

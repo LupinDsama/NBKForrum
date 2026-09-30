@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Link, NavLink, useNavigate } from 'react-router-dom';
 import { List, Sun, Moon, SignOut, UserCircle } from '@phosphor-icons/react';
 import { useAuth } from '../context/AuthContext.jsx';
+import NotifBell from './NotifBell.jsx';
 
 export default function Navbar({ theme, onTheme }) {
   const { user, logout, isAdmin } = useAuth();
@@ -26,6 +27,7 @@ export default function Navbar({ theme, onTheme }) {
         >
           <List size={20} weight="regular" />
         </button>
+        {user && <span className="mobile-bell"><NotifBell /></span>}
         {!user && (
           <span className="mobile-auth">
             <Link to="/login" onClick={() => setOpen(false)}>Đăng nhập</Link>
@@ -39,6 +41,7 @@ export default function Navbar({ theme, onTheme }) {
           {user ? (
             <>
               <span className="meta"><UserCircle size={18} weight="regular" />{user.displayName}</span>
+              <NotifBell />
               <button className="btn btn-ghost" onClick={onLogout}>
                 <SignOut size={17} weight="regular" />Đăng xuất
               </button>
